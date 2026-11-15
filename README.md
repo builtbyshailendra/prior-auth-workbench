@@ -1,6 +1,6 @@
 # prior-auth-workbench
 
-![Status](https://img.shields.io/badge/status-step%209%20of%2015-orange)
+![Status](https://img.shields.io/badge/status-step%2010%20of%2015-orange)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 **A prior-authorization request arrives from any of four source systems, gets checked against the health plan's documentation rules, has its key facts pulled out of the clinical notes with quotes as proof, and lands in a queue where people decide, on the clock CMS sets.**
@@ -242,6 +242,39 @@ Replays are safe because the workflow service treats (source, source_id) as one 
 **What broke:** the baseline exposed a bug in my verifier. "Has not tried physical therapy" means 0 weeks, but the rule "the number must appear in its quote" dropped every correct zero. Zero now passes when the quote says something wasn't done.
 
 **Decision:** the test set and scoring come before the model. Without them, "the AI is accurate" would only be an impression. The Claude row in the results table stays empty until it's actually run.
+
+### Step 10: extraction with checked quotes
+
+![Facts next to their quotes](docs/screenshots/4-facts-with-quotes.png)
+
+*The answers in this screenshot were sent by the browser test acting as the worker (shown as `scripted-test-double`), not by a live model run.*
+
+**Built:**
+- **A Claude extractor** (Claude Opus 5.5):
+  - one request per case
+  - structured JSON output against a strict schema
+  - low effort
+  - server-side refusal fallback
+  - instructions marked for caching
+  - every API error mapped to "unavailable"
+- **An extraction worker** (`python -m app.worker`) that holds only the extractor token. It can claim cases waiting for extraction and send back raw answers, nothing else.
+- **On the workflow side:** every answer is checked against the documents before a reviewer sees it. Each fact is stored as verified, not documented, or couldn't verify, with the run's tokens and cost.
+- **On the reviewer screen:** each fact sits next to its quote, with **Show in document** highlighting it. Unverified answers are marked as such, never shown as facts.
+- **A manual GitHub workflow** to score Claude on the test set once a key exists.
+
+AS-08 (a made-up quote is dropped) and AS-09 (AI failure or silence goes to manual entry) are now tests. 146 workflow tests.
+
+**What broke:** the worker's answers came back 422. FastAPI matched `/api/cases/{id}/extraction` to the generic `/api/cases/{id}/{action}` route first, which only accepts decision names. The worker now has its own path, `/api/extraction/{case_id}`.
+
+**Decisions** ([decision record 0003](docs/decisions/0003-ai-extraction.md)):
+- **The worker is a separate, least-privileged process** whose answers are never trusted.
+- **Intake never waits on the AI:**
+  - a failed answer goes to manual entry
+  - a worker that goes silent is overtaken by a 10-minute sweep
+  - each claim is leased for 5 minutes so a crashed worker's cases are picked up again
+- **No citations feature.** Claude's citations can't be combined with structured output, so our own verifier checks the quotes.
+
+**Not done yet:** a live Claude run on the test set. This project has no API key, so the results table says "not run yet" rather than showing an estimate.
 
 ## License
 

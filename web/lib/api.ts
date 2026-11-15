@@ -40,8 +40,9 @@ export type Fact = {
   value: unknown;
   quote: string | null;
   document_id: number | null;
-  method: "ai" | "manual";
-  status: "verified" | "dropped" | "entered";
+  method: "ai" | "rules" | "manual";
+  entered_by: string | null;
+  status: "verified" | "not_documented" | "dropped" | "entered";
   note: string;
 };
 
@@ -67,6 +68,7 @@ export type CaseDetail = CaseSummary & {
   rfis: { items: { type: string; label: string }[]; created_at: string; resolved_at: string | null }[];
   history: { event: string; actor: string; role: string; from: State | null; to: State | null; trace_id: string; at: string }[];
   facts?: Fact[];
+  extraction?: null | { provider: string; model: string; status: string; verified: number; dropped: number; cost_usd: number; duration_ms: number };
   summary?: Summary | null;
 };
 

@@ -49,3 +49,27 @@ class IntakeRequest(Strict):
 
 class DocumentsIn(Strict):
     documents: list[DocumentIn] = Field(min_length=1, max_length=50)
+
+
+class FactIn(Strict):
+    field: str = Field(max_length=40)
+    value: str | None = Field(default=None, max_length=40)
+    quote: str | None = Field(default=None, max_length=2000)
+
+
+class ExtractionResultIn(Strict):
+    """What the extraction worker sends back. Raw answers: the workflow service checks them."""
+
+    provider: Literal["claude", "rules"]
+    model: str = Field(max_length=60)
+    status: Literal["ok", "failed"]
+    facts: list[FactIn] = Field(default_factory=list, max_length=20)
+    error: str = Field(default="", max_length=500)
+    input_tokens: int = 0
+    output_tokens: int = 0
+    cost_usd: float = 0.0
+    duration_ms: int = 0
+
+
+class ClaimIn(Strict):
+    limit: int = Field(default=5, ge=1, le=20)

@@ -8,7 +8,8 @@ from app.catalogue import Catalogue
 from app.clocks import clock, hours_left, risk
 from app.intake import open_rfi
 from app.lifecycle import REASON_CODES
-from app.models import AuditEvent, Case
+from app.extraction.fields import FIELDS
+from app.models import AuditEvent, Case, ExtractionRun
 
 OPEN = {"received", "pended", "ready_for_review", "in_nurse_review", "escalated"}
 
@@ -63,9 +64,26 @@ def case_detail(session: Session, case: Case, catalogue: Catalogue) -> dict:
              "resolved_at": r.resolved_at.isoformat() if r.resolved_at else None}
             for r in case.rfis
         ],
+        "facts": [
+            {"id": f.id, "field": f.field, "label": FIELDS[f.field].label if f.field in FIELDS else f.field,
+             "value": f.value, "quote": f.quote, "document_id": f.document_id, "method": f.method,
+             "status": f.status, "note": f.note, "entered_by": f.entered_by}
+            for f in case.facts if not f.superseded
+        ],
+        "extraction": _last_run(session, case),
         "history": [
             {"event": e.event, "actor": e.actor, "role": e.actor_role, "from": e.from_state, "to": e.to_state,
              "detail": e.detail, "trace_id": e.trace_id, "at": e.at.isoformat()}
             for e in events
         ],
     }
+
+
+def _last_run(session: Session, case: Case) -> dict | None:
+    run = session.scalars(
+        select(ExtractionRun).where(ExtractionRun.case_id == case.id).order_by(ExtractionRun.id.desc()).limit(1)
+    ).first()
+    if run is None:
+        return None
+    return {"provider": run.provider, "model": run.model, "status": run.status, "verified": run.verified,
+            "dropped": run.dropped, "cost_usd": run.cost_usd, "duration_ms": run.duration_ms}

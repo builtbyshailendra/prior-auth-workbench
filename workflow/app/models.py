@@ -39,7 +39,7 @@ STATES = (
 OPEN_STATES = ("received", "pended", "ready_for_review", "in_nurse_review", "escalated")
 PRIORITIES = ("standard", "expedited")
 SOURCES = ("fhir", "x12", "fax", "crm", "api")
-EXTRACTION_STATUSES = ("not_started", "complete", "manual_needed", "not_applicable")
+EXTRACTION_STATUSES = ("not_started", "pending", "complete", "manual_needed", "not_applicable")
 ROLES = ("intake_coordinator", "nurse_reviewer", "medical_director", "admin")
 
 
@@ -124,6 +124,8 @@ class Case(Base):
     catalogue_version: Mapped[str] = mapped_column(String(20))
     rfi_count: Mapped[int] = mapped_column(Integer, default=0)
     extraction_status: Mapped[str] = mapped_column(String(20), default="not_started")
+    extraction_requested_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    extraction_claimed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     ready_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     assigned_to: Mapped[str | None] = mapped_column(String(40))
     decided_by: Mapped[str | None] = mapped_column(String(40))
@@ -136,6 +138,7 @@ class Case(Base):
     documents: Mapped[list[Document]] = relationship(back_populates="case", order_by="Document.id")
     submissions: Mapped[list[Submission]] = relationship(back_populates="case", order_by="Submission.id")
     rfis: Mapped[list[Rfi]] = relationship(back_populates="case", order_by="Rfi.id")
+    facts: Mapped[list[Fact]] = relationship(back_populates="case", order_by="Fact.id")
 
 
 class Submission(Base):
@@ -182,6 +185,57 @@ class Rfi(Base):
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     case: Mapped[Case] = relationship(back_populates="rfis")
+
+
+class Fact(Base):
+    """One checklist fact for a case, with where it came from.
+
+    method: ai (Claude), rules (the baseline) or manual (a person).
+    status: verified (quote checked), not_documented, dropped (failed checks) or entered (by a person).
+    """
+
+    __tablename__ = "facts"
+    __table_args__ = (
+        CheckConstraint("method IN ('ai', 'rules', 'manual')", name="fact_method_is_known"),
+        CheckConstraint("status IN ('verified', 'not_documented', 'dropped', 'entered')", name="fact_status_is_known"),
+        # A verified fact always has its quote. That is the whole point.
+        CheckConstraint("status <> 'verified' OR quote IS NOT NULL", name="verified_fact_has_quote"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    case_id: Mapped[int] = mapped_column(ForeignKey("cases.id"), index=True)
+    field: Mapped[str] = mapped_column(String(40))
+    value: Mapped[object] = mapped_column(JSONB, nullable=True)
+    quote: Mapped[str | None] = mapped_column(Text)
+    document_id: Mapped[int | None] = mapped_column(ForeignKey("documents.id"))
+    method: Mapped[str] = mapped_column(String(10))
+    status: Mapped[str] = mapped_column(String(20))
+    note: Mapped[str] = mapped_column(Text, default="")
+    entered_by: Mapped[str | None] = mapped_column(String(40))
+    superseded: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    case: Mapped[Case] = relationship(back_populates="facts")
+
+
+class ExtractionRun(Base):
+    """One attempt to extract facts for a case: who ran it, what it cost, how it ended."""
+
+    __tablename__ = "extraction_runs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    case_id: Mapped[int] = mapped_column(ForeignKey("cases.id"), index=True)
+    provider: Mapped[str] = mapped_column(String(20))
+    model: Mapped[str] = mapped_column(String(60))
+    status: Mapped[str] = mapped_column(String(20))  # ok, failed, timed_out
+    error: Mapped[str] = mapped_column(Text, default="")
+    verified: Mapped[int] = mapped_column(Integer, default=0)
+    dropped: Mapped[int] = mapped_column(Integer, default=0)
+    input_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    output_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    cost_usd: Mapped[float] = mapped_column(default=0.0)
+    duration_ms: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class AuditEvent(Base):

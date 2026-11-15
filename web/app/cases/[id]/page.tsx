@@ -9,7 +9,7 @@ import { useSession } from "../../session";
 import { Actions } from "./actions";
 import { Facts } from "./facts";
 
-type Doc = { id: number; title: string; doc_type: string; text: string };
+type Doc = { id: number; title: string; doc_type: string; text: string; highlight?: string };
 
 export default function CasePage() {
   const { id } = useParams<{ id: string }>();
@@ -31,8 +31,9 @@ export default function CasePage() {
     if (me) void load();
   }, [me, load]);
 
-  async function showDocument(documentId: number) {
-    setOpenDoc(await api<Doc>(`/api/cases/${id}/documents/${documentId}`));
+  async function showDocument(documentId: number, highlight?: string) {
+    const doc = await api<Doc>(`/api/cases/${id}/documents/${documentId}`);
+    setOpenDoc({ ...doc, highlight });
   }
 
   if (!me) return null;
@@ -151,7 +152,7 @@ export default function CasePage() {
                     Close
                   </button>
                 </div>
-                <pre>{openDoc.text}</pre>
+                <pre>{withHighlight(openDoc.text, openDoc.highlight)}</pre>
               </div>
             )}
           </section>
@@ -169,6 +170,25 @@ export default function CasePage() {
           </section>
         </div>
       </div>
+    </>
+  );
+}
+
+// Marks the first occurrence of the quote, ignoring case and spacing differences.
+function withHighlight(text: string, quote?: string): React.ReactNode {
+  if (!quote) return text;
+  const pattern = quote
+    .trim()
+    .split(/\s+/)
+    .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .join("\\s+");
+  const match = new RegExp(pattern, "i").exec(text);
+  if (!match) return text;
+  return (
+    <>
+      {text.slice(0, match.index)}
+      <mark>{match[0]}</mark>
+      {text.slice(match.index + match[0].length)}
     </>
   );
 }

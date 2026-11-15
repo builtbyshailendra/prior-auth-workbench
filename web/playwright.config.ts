@@ -9,6 +9,7 @@ import { defineConfig, devices } from "@playwright/test";
 const CI = Boolean(process.env.CI);
 export const CONNECTOR_TOKEN = process.env.CONNECTOR_TOKEN ?? "connector-token-for-e2e-only-0001";
 export const DEMO_PASSWORD = process.env.DEMO_PASSWORD ?? "e2e-demo-password";
+export const EXTRACTOR_TOKEN = process.env.EXTRACTOR_TOKEN ?? "extractor-token-for-e2e-only-0001";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -33,7 +34,10 @@ export default defineConfig({
       env: {
         DATABASE_URL: process.env.DATABASE_URL ?? "postgresql+psycopg://postgres@127.0.0.1:5433/priorauth_e2e",
         CONNECTOR_TOKEN,
+        EXTRACTOR_TOKEN,
         DEMO_PASSWORD,
+        // Cases wait for extraction; the test plays the worker (CI also runs the real one).
+        EXTRACTION_MODE: "worker",
         SEED_DEMO_DATA: "1",
         APP_ENV: "dev",
       },

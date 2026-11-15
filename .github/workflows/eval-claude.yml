@@ -1,0 +1,42 @@
+name: eval-claude
+# Scores Claude on the labelled synthetic test set. Run by hand from the Actions tab.
+# Needs the ANTHROPIC_API_KEY repository secret. One run costs roughly $1 to $1.50
+# at Claude Opus 5.5 prices (40 notes). Results are uploaded as an artifact.
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: "Claude model ID"
+        default: "claude-opus-5-5"
+
+permissions:
+  contents: read
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workflow
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - name: check the secret exists
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::Add an ANTHROPIC_API_KEY repository secret first."
+            exit 1
+          fi
+      - name: score Claude
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python -m eval.run --provider claude --model "${{ inputs.model }}" --save
+      - uses: actions/upload-artifact@v4
+        with:
+          name: claude-eval
+          path: workflow/eval/results/claude.json

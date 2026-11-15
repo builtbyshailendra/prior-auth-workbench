@@ -1,5 +1,5 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
-import { CONNECTOR_TOKEN, DEMO_PASSWORD } from "../playwright.config";
+import { CONNECTOR_TOKEN, DEMO_PASSWORD, EXTRACTOR_TOKEN } from "../playwright.config";
 
 // One request from intake to a decision, as three different people, in a real browser.
 // Set SCREENSHOTS=1 to also save a picture of each step into ../docs/screenshots.
@@ -33,6 +33,29 @@ async function send(request: APIRequestContext, body: object): Promise<number> {
   });
   expect(response.ok(), await response.text()).toBeTruthy();
   return (await response.json()).case_id;
+}
+
+// Plays the extraction worker: claims waiting cases and answers for the lumbar case,
+// with one real quote, one made-up quote and one fact the note doesn't mention.
+async function extractAs(request: APIRequestContext, caseId: number) {
+  const headers = { Authorization: `Bearer ${EXTRACTOR_TOKEN}` };
+  const jobs = await (await request.post("/api/extraction/claim", { headers, data: { limit: 20 } })).json();
+  expect(jobs.map((j: { case_id: number }) => j.case_id)).toContain(caseId);
+  const response = await request.post(`/api/extraction/${caseId}`, {
+    headers,
+    data: {
+      provider: "claude",
+      model: "scripted-test-double", // the test plays the worker; no live model in this test
+      status: "ok",
+      facts: [
+        { field: "conservative_therapy_weeks", value: "6", quote: "Completed 6 weeks of physical therapy." },
+        { field: "red_flags_present", value: "false", quote: "Denies bowel or bladder changes." },
+        { field: "symptom_duration_weeks", value: "12", quote: "Back pain for 12 weeks." },
+        { field: "prior_imaging_done", value: "unknown", quote: "" },
+      ],
+    },
+  });
+  expect(response.ok(), await response.text()).toBeTruthy();
 }
 
 function lumbarRequest() {
@@ -69,6 +92,7 @@ function sleepRequestWithoutDocuments() {
 test("a request goes from intake to a medical director's decision", async ({ page, request }) => {
   const lumbar = await send(request, lumbarRequest());
   const sleep = await send(request, sleepRequestWithoutDocuments());
+  await extractAs(request, lumbar);
 
   await test.step("Intake sees the incomplete request and exactly what's missing", async () => {
     await signIn(page, "ivy");
@@ -89,8 +113,16 @@ test("a request goes from intake to a medical director's decision", async ({ pag
     await expect(page.getByTestId(`case-row-${sleep}`)).toHaveCount(0); // not complete, so not in a nurse's queue
     await shot(page, "2-nurse-queue");
     await row.getByRole("link").click();
-    await page.getByRole("button", { name: "Clinic note" }).click();
-    await expect(page.getByTestId("document-view")).toContainText("Completed 6 weeks of physical therapy");
+    // Facts sit next to their quotes; the made-up quote is not shown as a fact.
+    await expect(page.getByTestId("fact-conservative_therapy_weeks")).toContainText("6");
+    await expect(page.getByTestId("fact-conservative_therapy_weeks")).toContainText("Completed 6 weeks of physical therapy.");
+    await expect(page.getByTestId("fact-red_flags_present")).toContainText("No");
+    await expect(page.getByTestId("fact-symptom_duration_weeks")).toContainText("Couldn't verify");
+    await expect(page.getByTestId("fact-symptom_duration_weeks")).toContainText("doesn't appear in any document");
+    await expect(page.getByTestId("fact-prior_imaging_done")).toContainText("Not documented");
+    await page.getByTestId("fact-conservative_therapy_weeks").getByRole("button", { name: "Show in document" }).click();
+    await expect(page.getByTestId("document-view").locator("mark")).toHaveText("Completed 6 weeks of physical therapy.");
+    await shot(page, "4-facts-with-quotes");
     await page.getByRole("button", { name: "Pick up for review" }).click();
     await expect(page.getByTestId("case-state")).toHaveText("In nurse review");
     await expect(page.getByRole("button", { name: "Deny" })).toHaveCount(0); // nurses can't deny
@@ -121,6 +153,14 @@ test("a request goes from intake to a medical director's decision", async ({ pag
 
 test("the server refuses a decision the page doesn't offer", async ({ request }) => {
   const caseId = await send(request, { ...lumbarRequest(), source_id: `e2e-fax-b-${run}`, member: { id: "SYN-M0005", name: "x" } });
+  // The worker reports a failure, so the case goes to review with facts for manual entry.
+  const worker = { Authorization: `Bearer ${EXTRACTOR_TOKEN}` };
+  await request.post("/api/extraction/claim", { headers: worker, data: { limit: 20 } });
+  const failed = await request.post(`/api/extraction/${caseId}`, {
+    headers: worker,
+    data: { provider: "claude", model: "claude-opus-5-5", status: "failed", error: "Timed out (simulated)" },
+  });
+  expect(failed.ok(), await failed.text()).toBeTruthy();
   const signIn = await request.post("/api/auth/login", { data: { username: "omar", password: DEMO_PASSWORD } });
   expect(signIn.ok()).toBeTruthy();
   const headers = { "X-Requested-With": "workbench" };

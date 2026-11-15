@@ -1,6 +1,6 @@
 # prior-auth-workbench
 
-![Status](https://img.shields.io/badge/status-step%2012%20of%2015-orange)
+![Status](https://img.shields.io/badge/status-step%2013%20of%2015-orange)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 **A prior-authorization request arrives from any of four source systems, gets checked against the health plan's documentation rules, has its key facts pulled out of the clinical notes with quotes as proof, and lands in a queue where people decide, on the clock CMS sets.**
@@ -320,6 +320,25 @@ AS-08 (a made-up quote is dropped) and AS-09 (AI failure or silence goes to manu
   - an **AI outage drill**: with the worker stopped, a new case must still reach a nurse, with facts marked for manual entry
 
 **Checked locally:** actionlint, shellcheck, `docker compose config` and 158 workflow tests. Docker can't run on my machine, so everything that needs containers runs in GitHub Actions. The first results go in the next entry.
+
+### Step 13: deploy, roll back, and survive outages
+
+**Built:**
+- **Kubernetes manifests** (kustomize base plus a kind overlay):
+  - the workflow service: two replicas, startup/liveness/readiness probes, an init container that waits for the database, `maxUnavailable: 0`, a 90-second progress deadline, read-only root filesystem, all capabilities dropped
+  - the extraction worker: one replica, extractor token only, no Service, because nothing calls it
+  - the web app on a NodePort
+  - one PostgreSQL pod
+- **A deploy script** that generates every secret on first deploy (database password, session secret, both service tokens, demo password), stored only in a Kubernetes Secret. It applies the release and, if anything isn't ready in time, rolls back every Deployment the release changed.
+- **Operations docs:** [runbook](docs/operations/runbook.md), [support playbook](docs/operations/support-playbook.md), [deployment patterns](docs/operations/deployment-pattern.md).
+
+**The CI Kubernetes job runs, on every push:**
+- **Deploy and smoke test:** through the NodePort, with the real extraction worker.
+- **Bad release:** a release that crashes the workflow service on startup, while a script calls the app about five times a second. It has to be refused and rolled back with no failed calls.
+- **AI outage:** the worker scaled to zero. New cases must still reach a nurse, with facts marked for manual entry.
+- **Database outage:** the workflow pods must go not-ready without being restarted, and recover by themselves.
+
+**Checked locally:** `kubectl kustomize`, shellcheck and actionlint. The cluster runs only in CI. The results go in the next entry.
 
 ## License
 

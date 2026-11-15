@@ -1,0 +1,45 @@
+# The extraction worker: same image as the workflow service, different command, and
+# only the extractor token. It needs no Service: nothing calls it; it calls the workflow.
+# To use Claude instead of the rules baseline, set EXTRACTOR=claude and add an
+# ANTHROPIC_API_KEY from a Secret.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: worker
+          image: priorauth-workflow
+          command: ["python", "-m", "app.worker"]
+          env:
+            - name: WORKFLOW_URL
+              value: http://workflow:8000
+            - name: EXTRACTOR
+              value: rules
+            - name: POLL_SECONDS
+              value: "2"
+            - name: EXTRACTOR_TOKEN
+              valueFrom:
+                secretKeyRef: {name: priorauth-secrets, key: extractor-token}
+          resources:
+            requests: {cpu: 20m, memory: 96Mi}
+            limits: {memory: 256Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]

@@ -181,3 +181,110 @@ jobs:
           docker push "$WORKFLOW_IMAGE"
           docker push "$WEB_IMAGE"
           docker push "$CONNECTORS_IMAGE"
+
+  kubernetes:
+    # The same images on a throwaway kind cluster, with the real manifests and deploy script.
+    needs: images
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ needs.images.outputs.tag }}
+      KIND_VERSION: v0.33.0
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: images
+
+      - name: load the images
+        run: gunzip -c images.tar.gz | docker load
+
+      - name: create a kind cluster
+        run: |
+          curl -fsSLo "$RUNNER_TEMP/kind" "https://kind.sigs.k8s.io/dl/$KIND_VERSION/kind-linux-amd64"
+          sudo install -m 0755 "$RUNNER_TEMP/kind" /usr/local/bin/kind
+          kind create cluster --config deploy/kind/cluster.yaml --wait 120s
+          kubectl version
+          kind load docker-image --name priorauth "$REGISTRY/priorauth-workflow:$TAG" "$REGISTRY/priorauth-web:$TAG"
+
+      - name: deploy the release
+        run: deploy/scripts/deploy.sh "$TAG"
+
+      - name: read the generated secrets for the tests
+        run: |
+          secret() { kubectl -n priorauth get secret priorauth-secrets -o "jsonpath={.data.$1}" | base64 -d; }
+          {
+            echo "CONNECTOR_TOKEN=$(secret connector-token)"
+            echo "DEMO_PASSWORD=$(secret demo-password)"
+          } >> "$GITHUB_ENV"
+          echo "::add-mask::$(secret connector-token)"
+          echo "::add-mask::$(secret demo-password)"
+
+      - name: smoke test through the NodePort
+        run: python3 deploy/scripts/smoke.py http://127.0.0.1:8080
+
+      - name: a bad release is refused and rolled back, and users don't notice
+        run: |
+          docker build -f deploy/test/bad-release.Dockerfile \
+            --build-arg BASE="$REGISTRY/priorauth-workflow:$TAG" \
+            -t "$REGISTRY/priorauth-workflow:bad" deploy/test
+          docker tag "$REGISTRY/priorauth-web:$TAG" "$REGISTRY/priorauth-web:bad"
+          kind load docker-image --name priorauth "$REGISTRY/priorauth-workflow:bad" "$REGISTRY/priorauth-web:bad"
+
+          python3 deploy/scripts/watch.py http://127.0.0.1:8080/api/ready > watch.log 2>&1 &
+          watcher=$!
+          if TIMEOUT=60s deploy/scripts/deploy.sh bad; then
+            echo "::error::the bad release was accepted"
+            exit 1
+          fi
+          kill -TERM "$watcher"
+          watch_ok=0
+          wait "$watcher" || watch_ok=$?
+          cat watch.log
+
+          for d in workflow worker web; do
+            image=$(kubectl -n priorauth get deployment "$d" -o jsonpath='{.spec.template.spec.containers[0].image}')
+            echo "$d is on $image"
+            case "$image" in *":$TAG") ;; *) echo "::error::$d wasn't rolled back"; exit 1 ;; esac
+          done
+          kubectl -n priorauth rollout history deployment/workflow
+          [ "$watch_ok" = 0 ] || { echo "::error::requests failed while the bad release was rolled back"; exit 1; }
+
+      - name: AI outage drill - the worker is gone, cases go to manual entry
+        env:
+          EXPECT_EXTRACTION: manual_needed
+          WAIT: "150"
+        run: |
+          kubectl -n priorauth scale deployment/worker --replicas=0
+          kubectl -n priorauth wait pod -l app=worker --for=delete --timeout=60s
+          python3 deploy/scripts/smoke.py http://127.0.0.1:8080
+          kubectl -n priorauth scale deployment/worker --replicas=1
+          kubectl -n priorauth rollout status deployment/worker --timeout=90s
+
+      - name: a database outage makes the workflow not-ready, not restarted
+        run: |
+          restarts() {
+            kubectl -n priorauth get pods -l app=workflow \
+              -o jsonpath='{range .items[*]}{.status.containerStatuses[0].restartCount} {end}'
+          }
+          before=$(restarts)
+          kubectl -n priorauth scale statefulset/postgres --replicas=0
+          kubectl -n priorauth wait pod -l app=postgres --for=delete --timeout=90s
+          kubectl -n priorauth wait pod -l app=workflow --for=condition=Ready=false --timeout=60s
+          sleep 40
+          during=$(restarts)
+          echo "restart counts: before [$before] during the outage [$during]"
+          [ "$before" = "$during" ] || { echo "::error::workflow pods were restarted during the outage"; exit 1; }
+          kubectl -n priorauth scale statefulset/postgres --replicas=1
+          kubectl -n priorauth rollout status statefulset/postgres --timeout=120s
+          kubectl -n priorauth wait pod -l app=workflow --for=condition=Ready --timeout=120s
+          python3 deploy/scripts/smoke.py http://127.0.0.1:8080
+
+      - name: show what the cluster saw
+        if: failure()
+        run: |
+          kubectl -n priorauth get all,pvc
+          kubectl -n priorauth get events --sort-by=.lastTimestamp | tail -40
+          kubectl -n priorauth logs -l app=workflow --all-containers --tail=60 --prefix || true
+          kubectl -n priorauth logs -l app=worker --tail=40 --prefix || true
+          kubectl -n priorauth logs -l app=web --tail=30 --prefix || true

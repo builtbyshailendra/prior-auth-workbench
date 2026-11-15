@@ -1,6 +1,6 @@
 # prior-auth-workbench
 
-![Status](https://img.shields.io/badge/status-step%204%20of%2015-orange)
+![Status](https://img.shields.io/badge/status-step%205%20of%2015-orange)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 **A prior-authorization request arrives from any of four source systems, gets checked against the health plan's documentation rules, has its key facts pulled out of the clinical notes with quotes as proof, and lands in a queue where people decide, on the clock CMS sets.**
@@ -37,7 +37,7 @@ flowchart LR
 | Stage | Steps | Status |
 |---|---|---|
 | A. Discovery | 1. Discovery pack | ✅ Done |
-| B. Core workflow | 2. Rules and validation · 3. Case lifecycle, audit, clocks · 4. Sign-in and permissions · 5. Reviewer screen | In progress |
+| B. Core workflow | 2. Rules and validation · 3. Case lifecycle, audit, clocks · 4. Sign-in and permissions · 5. Reviewer screen | ✅ Done |
 | C. Integrations | 6. Connector service and FHIR · 7. X12 278, fax and CRM · 8. Reliability | |
 | D. Bounded AI | 9. Labelled test set · 10. Extraction with checked quotes · 11. Reviewer summary | |
 | E. Operate | 12. Containers and CI · 13. Deploy, rollback and outage drills | |
@@ -135,6 +135,24 @@ AS-10 and AS-11 now also run over HTTP. 112 tests.
 - **No one-off sign-in for the real world.** For a real client, the password sign-in gets replaced by their identity provider, and the role checks stay as they are ([decision record 0002](docs/decisions/0002-sign-in.md)).
 - **"No such case" for cases you can't see.** A case someone isn't allowed to see answers the same as one that doesn't exist, so case numbers don't leak.
 - **Services can never decide.** Neither service role appears in any decision's allowed list. A test calls every decision endpoint with the extraction worker's token and expects 403 each time.
+
+### Step 5: reviewer screen
+
+![A denied case with its history](docs/screenshots/3-decided-with-history.png)
+
+**Built:** the Next.js reviewer screen:
+- **Sign-in** page.
+- **A queue for each person,** sorted by deadline, with risk badges and expedited tags.
+- **A case page** with the request, missing documents, documents to read, history and "your next step". It only shows the buttons this person may use right now.
+- **User management** for admins.
+
+The browser only talks to Next.js, which passes `/api/*` on to the workflow service. That keeps the session cookie first-party, with no CORS setup.
+
+**Tested:** two Playwright tests:
+- **The full journey:** intake sees exactly what's missing; a nurse reads a document, picks the case up and escalates it; the medical director is refused a denial without a reason code, then denies with one, and the history shows every step.
+- **The server's own refusal:** a nurse calling the deny endpoint directly gets a 403.
+
+**What broke:** checking for the error message by its `alert` role found two elements: my message, and Next.js's own hidden route announcer, which also has `role="alert"`. The test now picks the alert that contains the message.
 
 ## License
 

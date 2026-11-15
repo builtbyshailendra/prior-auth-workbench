@@ -1,14 +1,19 @@
-// Command line: send every message in a folder to the workflow service.
+// Command line.
 //
-//   CONNECTOR_TOKEN=... node src/cli.ts ingest fixtures
+//   node src/cli.ts ingest <folder>    send every message in the folder
+//   node src/cli.ts replay [folder]    retry everything parked or rejected; with a folder,
+//                                      re-read each message from it first (so a fixed source wins)
+//   node src/cli.ts status             list what's waiting in the outbox
 //
-// WORKFLOW_URL defaults to http://127.0.0.1:8000.
+// Environment: CONNECTOR_TOKEN (required), WORKFLOW_URL (default http://127.0.0.1:8000),
+// OUTBOX_DIR (default ./out), MAX_ATTEMPTS, TIMEOUT_MS, BASE_DELAY_MS.
 
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { documentList, parseCsv } from "./adapters/fax.ts";
 import type { Source } from "./canonical.ts";
-import { processMessage, type Message } from "./pipeline.ts";
+import { Outbox } from "./outbox.ts";
+import { processMessage, type Message, type PipelineOptions } from "./pipeline.ts";
 
 export function readMessages(root: string): Message[] {
   const messages: Message[] = [];
@@ -31,7 +36,7 @@ export function readMessages(root: string): Message[] {
   // The fax index lists documents by path; load their text now so the adapter only maps.
   if (files("fax", ".csv").includes("index.csv")) {
     const rows = parseCsv(readFileSync(join(root, "fax", "index.csv"), "utf8"));
-    rows.forEach((row, i) => {
+    rows.forEach((row) => {
       const documents = documentList(row.documents ?? "").map((d) => {
         let text: string | null = null;
         try {
@@ -41,31 +46,55 @@ export function readMessages(root: string): Message[] {
         }
         return { ...d, text };
       });
-      messages.push({ source: "fax", ref: `fax/index.csv#row${i + 2}`, raw: JSON.stringify({ row, documents }) });
+      // Referenced by fax ID, not row number, so a fixed row still matches on replay.
+      messages.push({ source: "fax", ref: `fax/${row.fax_id || "row"}`, raw: JSON.stringify({ row, documents }) });
     });
   }
   return messages;
 }
 
-async function main(argv: string[]) {
-  const [command, dir = "fixtures"] = argv;
-  const token = process.env.CONNECTOR_TOKEN ?? "";
-  const baseUrl = process.env.WORKFLOW_URL ?? "http://127.0.0.1:8000";
-  if (command !== "ingest") {
-    console.error("usage: node src/cli.ts ingest <folder>");
-    process.exit(2);
-  }
-  if (!token) {
-    console.error("Set CONNECTOR_TOKEN to the token the workflow service expects.");
-    process.exit(2);
-  }
-  const counts: Record<string, number> = {};
-  for (const message of readMessages(dir)) {
-    const outcome = await processMessage(message, { baseUrl, token });
-    counts[outcome.status] = (counts[outcome.status] ?? 0) + 1;
-  }
-  console.error(`Done: ${JSON.stringify(counts)}`);
-  process.exit(counts.failed ? 1 : 0);
+function options(outbox: Outbox): PipelineOptions {
+  const number = (name: string) => (process.env[name] ? Number(process.env[name]) : undefined);
+  return {
+    baseUrl: process.env.WORKFLOW_URL ?? "http://127.0.0.1:8000",
+    token: process.env.CONNECTOR_TOKEN ?? "",
+    outbox,
+    maxAttempts: number("MAX_ATTEMPTS"),
+    timeoutMs: number("TIMEOUT_MS"),
+    baseDelayMs: number("BASE_DELAY_MS"),
+  };
 }
 
-if (import.meta.main) await main(process.argv.slice(2));
+export async function run(argv: string[]): Promise<number> {
+  const [command, dir] = argv;
+  const outbox = new Outbox(process.env.OUTBOX_DIR ?? "out");
+  const counts: Record<string, number> = {};
+  const tally = (status: string) => (counts[status] = (counts[status] ?? 0) + 1);
+
+  if (command === "status") {
+    for (const r of outbox.list()) console.log(`${r.kind}\t${r.ref}\t${r.reason}`);
+    return 0;
+  }
+  if (command !== "ingest" && command !== "replay") {
+    console.error("usage: node src/cli.ts ingest <folder> | replay [folder] | status");
+    return 2;
+  }
+  if (!process.env.CONNECTOR_TOKEN) {
+    console.error("Set CONNECTOR_TOKEN to the token the workflow service expects.");
+    return 2;
+  }
+
+  if (command === "ingest") {
+    for (const message of readMessages(dir ?? "fixtures")) tally((await processMessage(message, options(outbox))).status);
+  } else {
+    const fresh = new Map((dir ? readMessages(dir) : []).map((m) => [m.ref, m]));
+    for (const record of outbox.list()) {
+      tally((await processMessage(fresh.get(record.ref) ?? record.message, options(outbox))).status);
+    }
+  }
+  console.error(`Done: ${JSON.stringify(counts)}`);
+  // Parked messages need someone to look; rejected ones are reported but expected now and then.
+  return counts.parked ? 1 : 0;
+}
+
+if (import.meta.main) process.exit(await run(process.argv.slice(2)));

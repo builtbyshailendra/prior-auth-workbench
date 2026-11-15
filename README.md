@@ -1,6 +1,6 @@
 # prior-auth-workbench
 
-![Status](https://img.shields.io/badge/status-step%207%20of%2015-orange)
+![Status](https://img.shields.io/badge/status-step%208%20of%2015-orange)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 **A prior-authorization request arrives from any of four source systems, gets checked against the health plan's documentation rules, has its key facts pulled out of the clinical notes with quotes as proof, and lands in a queue where people decide, on the clock CMS sets.**
@@ -38,7 +38,7 @@ flowchart LR
 |---|---|---|
 | A. Discovery | 1. Discovery pack | ✅ Done |
 | B. Core workflow | 2. Rules and validation · 3. Case lifecycle, audit, clocks · 4. Sign-in and permissions · 5. Reviewer screen | ✅ Done |
-| C. Integrations | 6. Connector service and FHIR · 7. X12 278, fax and CRM · 8. Reliability | In progress |
+| C. Integrations | 6. Connector service and FHIR · 7. X12 278, fax and CRM · 8. Reliability | ✅ Done |
 | D. Bounded AI | 9. Labelled test set · 10. Extraction with checked quotes · 11. Reviewer summary | |
 | E. Operate | 12. Containers and CI · 13. Deploy, rollback and outage drills | |
 | F. Outcome | 14. Measure · 15. Business case and demo | |
@@ -195,6 +195,35 @@ The browser only talks to Next.js, which passes `/api/*` on to the workflow serv
 - **A Windows path quirk.** The fax test built its fixture path from `new URL(...).pathname`, which keeps `%20` for the space in my folder name. It found no files. `fileURLToPath` fixes it.
 
 **Open question, written down:** how a clearinghouse flags an expedited 278 depends on its companion guide, which this project doesn't have. X12 requests arrive as standard until that's confirmed.
+
+### Step 8: reliability
+
+**Built:**
+- **Retries** for network errors, timeouts, 408, 429 and 5xx, with exponential backoff, jitter and a 30-second cap. `Retry-After` is honoured.
+- **A timeout** on every attempt.
+- **Nothing dropped:**
+  - After the last attempt, a record is **parked** with its reason.
+  - A 422 is **rejected** at once and kept for a person to fix.
+  - A refused token or a wrong URL parks at once instead of hammering the service.
+- **An outbox** (`out/parked`, `out/rejected`), one JSON file per message with the original kept, plus `replay` and `status` commands.
+
+Replays are safe because the workflow service treats (source, source_id) as one message.
+
+**Tested:** 8 failure tests against a real local HTTP server that misbehaves on purpose:
+- 503 twice, then success.
+- Timeouts until parked, then a replay after recovery that creates exactly one case (AS-13).
+- 429 with `Retry-After`.
+- 422, 401, and a service that isn't there at all.
+- A bad-NPI 278 rejected, fixed at the source and replayed (AS-07).
+
+30 connector tests.
+
+**Drill against the real service:**
+- **Stopped:** I stopped the workflow service and sent a new CRM request. It was parked after three attempts, and the command exited with code 1 so a scheduler would notice.
+- **Restarted:** `replay` created the case and emptied the outbox.
+- **Sent again:** the same message came back as a harmless replay.
+
+**Changed my mind:** fax messages were identified by their row number in the index. A corrected index can move rows, so replay matches them by fax ID instead.
 
 ## License
 

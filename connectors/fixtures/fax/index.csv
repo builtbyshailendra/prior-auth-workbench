@@ -1,0 +1,4 @@
+fax_id,received_at,member_id,member_name,provider_npi,provider_name,service_code,diagnosis_codes,service_date,priority,documents
+FAX-2001,2026-11-16T08:12:00Z,SYN-M0016,"Ellis Whitfield",1234567893,"Synthetic Orthopedics, PLLC",72148,M54.50,2026-12-09,standard,clinician_note=notes/fax-2001-note.txt;conservative_treatment_record=notes/fax-2001-pt.txt
+FAX-2002,2026-11-16T08:40:00Z,SYN-M0011,"Harper Okonkwo",1234567893,"Synthetic Sleep Medicine",95810,G47.33,2026-12-14,expedited,sleep_questionnaire=notes/fax-2002-questionnaire.txt
+FAX-2003,2026-11-16T09:02:00Z,SYN-M0019,"Morgan Petrov",1234567893,"Synthetic Orthopedics, PLLC",72148,M54.50,2026-12-11,standard,clinician_note=notes/fax-2003-note.txt

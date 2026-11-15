@@ -6,6 +6,7 @@
 
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { documentList, parseCsv } from "./adapters/fax.ts";
 import type { Source } from "./canonical.ts";
 import { processMessage, type Message } from "./pipeline.ts";
 
@@ -20,6 +21,28 @@ export function readMessages(root: string): Message[] {
   };
   for (const file of files("fhir", ".json")) {
     messages.push({ source: "fhir" as Source, ref: `fhir/${file}`, raw: readFileSync(join(root, "fhir", file), "utf8") });
+  }
+  for (const file of files("x12", ".x12")) {
+    messages.push({ source: "x12", ref: `x12/${file}`, raw: readFileSync(join(root, "x12", file), "utf8") });
+  }
+  for (const file of files("crm", ".json")) {
+    messages.push({ source: "crm", ref: `crm/${file}`, raw: readFileSync(join(root, "crm", file), "utf8") });
+  }
+  // The fax index lists documents by path; load their text now so the adapter only maps.
+  if (files("fax", ".csv").includes("index.csv")) {
+    const rows = parseCsv(readFileSync(join(root, "fax", "index.csv"), "utf8"));
+    rows.forEach((row, i) => {
+      const documents = documentList(row.documents ?? "").map((d) => {
+        let text: string | null = null;
+        try {
+          text = readFileSync(join(root, "fax", d.file), "utf8");
+        } catch {
+          text = null;
+        }
+        return { ...d, text };
+      });
+      messages.push({ source: "fax", ref: `fax/index.csv#row${i + 2}`, raw: JSON.stringify({ row, documents }) });
+    });
   }
   return messages;
 }

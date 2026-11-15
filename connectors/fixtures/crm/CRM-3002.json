@@ -1,0 +1,22 @@
+{
+ "case_number": "CRM-3002",
+ "created": "2026-11-15T17:05:00Z",
+ "channel": "portal",
+ "member": {
+  "id": "SYN-M0018",
+  "name": "Tatum Mbeki"
+ },
+ "provider": {
+  "npi": "1234567893",
+  "name": "Synthetic Family Practice"
+ },
+ "request": {
+  "cpt": "99213",
+  "icd10": [
+   "J06.9"
+  ],
+  "date": "2026-11-28",
+  "urgent": false
+ },
+ "attachments": []
+}

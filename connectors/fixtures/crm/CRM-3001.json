@@ -1,0 +1,33 @@
+{
+ "case_number": "CRM-3001",
+ "created": "2026-11-15T16:20:00Z",
+ "channel": "phone",
+ "member": {
+  "id": "SYN-M0014",
+  "name": "Dakota Lindqvist"
+ },
+ "provider": {
+  "npi": "1234567893",
+  "name": "Synthetic Physical Therapy"
+ },
+ "request": {
+  "cpt": "97110",
+  "icd10": [
+   "M25.561"
+  ],
+  "date": "2026-12-03",
+  "urgent": false
+ },
+ "attachments": [
+  {
+   "type": "plan_of_care",
+   "title": "Plan of care",
+   "text": "SYNTHETIC PLAN (fiction). Goals: climb stairs without pain; 8 more visits over 4 weeks."
+  },
+  {
+   "type": "progress_note",
+   "title": "Progress note",
+   "text": "SYNTHETIC NOTE (fiction). 20 visits used; knee flexion improved from 95 to 115 degrees."
+  }
+ ]
+}

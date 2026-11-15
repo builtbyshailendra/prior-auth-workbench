@@ -3,7 +3,10 @@
 
 import { randomUUID } from "node:crypto";
 import { AdapterError, type IntakeRequest, type Source, validate } from "./canonical.ts";
+import { fromCrm } from "./adapters/crm.ts";
+import { fromFax } from "./adapters/fax.ts";
 import { fromFhirBundle } from "./adapters/fhir.ts";
+import { fromX12_278 } from "./adapters/x12.ts";
 import { deliver, type DeliveryOptions, type DeliveryResult } from "./delivery.ts";
 
 export type Message = { source: Source; ref: string; raw: string };
@@ -14,8 +17,14 @@ export function parse(message: Message): IntakeRequest {
   switch (message.source) {
     case "fhir":
       return fromFhirBundle(JSON.parse(message.raw));
+    case "x12":
+      return fromX12_278(message.raw);
+    case "fax":
+      return fromFax(JSON.parse(message.raw));
+    case "crm":
+      return fromCrm(JSON.parse(message.raw));
     default:
-      throw new AdapterError([{ field: "source", message: `No adapter for ${message.source} yet` }]);
+      throw new AdapterError([{ field: "source", message: `No adapter for ${String(message.source)}` }]);
   }
 }
 

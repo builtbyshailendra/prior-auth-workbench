@@ -1,6 +1,6 @@
 # prior-auth-workbench
 
-![Status](https://img.shields.io/badge/status-step%206%20of%2015-orange)
+![Status](https://img.shields.io/badge/status-step%207%20of%2015-orange)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 **A prior-authorization request arrives from any of four source systems, gets checked against the health plan's documentation rules, has its key facts pulled out of the clinical notes with quotes as proof, and lands in a queue where people decide, on the clock CMS sets.**
@@ -169,6 +169,32 @@ The browser only talks to Next.js, which passes `/api/*` on to the workflow serv
 **Tested:** 11 connector tests. Also run by hand against the real workflow service: the two synthetic bundles became one case ready for review and one pended for its missing sleep questionnaire. Sending them again came back as harmless replays.
 
 **Decision:** a mapping, not a validator. The adapter takes exactly the fields the workflow needs and lists every problem it finds. It makes no claim of FHIR or Da Vinci conformance.
+
+### Step 7: X12 278, fax and CRM adapters
+
+**Built:** three more adapters, each with hand-built synthetic fixtures:
+- **X12 278 request** (`005010X217`): a narrow parser.
+  - It reads the element, component and segment separators from the fixed-width ISA header instead of assuming `*`, `:` and `~`.
+  - It checks the segment count in SE01.
+  - It walks the hierarchical levels for the requester (NPI with qualifier XX), the member (MI), diagnoses (`HI` with ABK/ABF) and the service date (`DTP*472`). The service code comes from `SV1`/`SV2`.
+- **Fax index:** a CSV row per fax (with a small quote-aware CSV reader) pointing at the faxed documents' text.
+- **CRM:** case records from the portal or call center.
+
+**What it does end to end:** one `ingest` run over all ten fixtures, against the real workflow service:
+- 9 delivered, 1 rejected.
+- **The 278 for the same request as a FHIR order linked** to the existing case instead of opening a new one.
+- **A later fax carrying only the missing sleep questionnaire** linked to its pended case and moved it to ready for review.
+- **The 278 with a bad NPI check digit** never left the connector.
+- **The CRM office visit** closed as "no authorization needed".
+- **The fax for a member whose coverage ended** closed as "not eligible".
+
+22 connector tests.
+
+**What broke:**
+- **A wrong count in my own test.** I expected 16 segments in the transaction; ST to SE is 15. The parser was right.
+- **A Windows path quirk.** The fax test built its fixture path from `new URL(...).pathname`, which keeps `%20` for the space in my folder name. It found no files. `fileURLToPath` fixes it.
+
+**Open question, written down:** how a clearinghouse flags an expedited 278 depends on its companion guide, which this project doesn't have. X12 requests arrive as standard until that's confirmed.
 
 ## License
 

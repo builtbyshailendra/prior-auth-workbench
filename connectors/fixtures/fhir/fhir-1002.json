@@ -1,0 +1,137 @@
+{
+ "resourceType": "Bundle",
+ "id": "fhir-1002",
+ "type": "collection",
+ "identifier": {
+  "system": "https://ehr.example/bundle-id",
+  "value": "fhir-1002"
+ },
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:fhir-1002-patient",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "fhir-1002-patient",
+    "identifier": [
+     {
+      "system": "https://tallowmere.example/fhir/member-id",
+      "value": "SYN-M0011"
+     }
+    ],
+    "name": [
+     {
+      "family": "Okonkwo",
+      "given": [
+       "Harper"
+      ]
+     }
+    ],
+    "birthDate": "1971-04-09"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:fhir-1002-coverage",
+   "resource": {
+    "resourceType": "Coverage",
+    "id": "fhir-1002-coverage",
+    "status": "active",
+    "beneficiary": {
+     "reference": "urn:uuid:fhir-1002-patient"
+    },
+    "payor": [
+     {
+      "display": "Tallowmere Health Plan (fictional)"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:fhir-1002-practitioner",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "fhir-1002-practitioner",
+    "identifier": [
+     {
+      "system": "http://hl7.org/fhir/sid/us-npi",
+      "value": "1234567893"
+     }
+    ],
+    "name": [
+     {
+      "text": "Synthetic Sleep Medicine"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:fhir-1002-order",
+   "resource": {
+    "resourceType": "ServiceRequest",
+    "id": "fhir-1002-order",
+    "identifier": [
+     {
+      "system": "https://ehr.example/order-id",
+      "value": "EHR-fhir-1002"
+     }
+    ],
+    "status": "active",
+    "intent": "order",
+    "priority": "urgent",
+    "authoredOn": "2026-11-12T09:30:00Z",
+    "code": {
+     "coding": [
+      {
+       "system": "http://www.ama-assn.org/go/cpt",
+       "code": "95810"
+      }
+     ]
+    },
+    "reasonCode": [
+     {
+      "coding": [
+       {
+        "system": "http://hl7.org/fhir/sid/icd-10-cm",
+        "code": "G47.33"
+       }
+      ]
+     }
+    ],
+    "subject": {
+     "reference": "urn:uuid:fhir-1002-patient"
+    },
+    "requester": {
+     "reference": "urn:uuid:fhir-1002-practitioner"
+    },
+    "occurrenceDateTime": "2026-12-14"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:fhir-1002-doc0",
+   "resource": {
+    "resourceType": "DocumentReference",
+    "id": "fhir-1002-doc0",
+    "status": "current",
+    "type": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "11506-3"
+      }
+     ]
+    },
+    "subject": {
+     "reference": "urn:uuid:fhir-1002-patient"
+    },
+    "content": [
+     {
+      "attachment": {
+       "contentType": "text/plain; charset=utf-8",
+       "title": "Sleep clinic note",
+       "data": "U1lOVEhFVElDIE5PVEUgKGZpY3Rpb24pLiBMb3VkIHNub3JpbmcgYW5kIHdpdG5lc3NlZCBwYXVzZXMgaW4gYnJlYXRoaW5nIHJlcG9ydGVkIGJ5IHBhcnRuZXIuIERheXRpbWUgc2xlZXBpbmVzcyBhZmZlY3RpbmcgZHJpdmluZy4gSG9tZSBzbGVlcCBhcG5lYSB0ZXN0IG5vdCBkb25lLg=="
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

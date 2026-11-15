@@ -1,0 +1,16 @@
+{
+  "name": "prior-auth-workbench-connectors",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "test": "node --test test/",
+    "typecheck": "tsc --noEmit",
+    "ingest": "node src/cli.ts ingest",
+    "replay": "node src/cli.ts replay"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.0",
+    "typescript": "~5.9.3"
+  }
+}

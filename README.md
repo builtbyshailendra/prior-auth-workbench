@@ -1,6 +1,6 @@
 # prior-auth-workbench
 
-![Status](https://img.shields.io/badge/status-step%205%20of%2015-orange)
+![Status](https://img.shields.io/badge/status-step%206%20of%2015-orange)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 **A prior-authorization request arrives from any of four source systems, gets checked against the health plan's documentation rules, has its key facts pulled out of the clinical notes with quotes as proof, and lands in a queue where people decide, on the clock CMS sets.**
@@ -38,7 +38,7 @@ flowchart LR
 |---|---|---|
 | A. Discovery | 1. Discovery pack | ✅ Done |
 | B. Core workflow | 2. Rules and validation · 3. Case lifecycle, audit, clocks · 4. Sign-in and permissions · 5. Reviewer screen | ✅ Done |
-| C. Integrations | 6. Connector service and FHIR · 7. X12 278, fax and CRM · 8. Reliability | |
+| C. Integrations | 6. Connector service and FHIR · 7. X12 278, fax and CRM · 8. Reliability | In progress |
 | D. Bounded AI | 9. Labelled test set · 10. Extraction with checked quotes · 11. Reviewer summary | |
 | E. Operate | 12. Containers and CI · 13. Deploy, rollback and outage drills | |
 | F. Outcome | 14. Measure · 15. Business case and demo | |
@@ -153,6 +153,22 @@ The browser only talks to Next.js, which passes `/api/*` on to the workflow serv
 - **The server's own refusal:** a nurse calling the deny endpoint directly gets a 403.
 
 **What broke:** checking for the error message by its `alert` role found two elements: my message, and Next.js's own hidden route announcer, which also has `role="alert"`. The test now picks the alert that contains the message.
+
+### Step 6: connector service and FHIR R4
+
+**Built:**
+- **The connector service in TypeScript.** It runs on Node's built-in TypeScript support, so there's no build step; `tsc` only type-checks.
+- **One internal request format** (`connectors/src/canonical.ts`), mirroring the workflow's schema, with the same NPI, code and member-ID checks, so obviously bad records stop before they're sent.
+- **A FHIR R4 adapter.** It reads a bundle's Patient, Coverage, Practitioner, ServiceRequest and DocumentReference resources:
+  - **Member ID** from the plan's identifier system, **NPI** from `us-npi`.
+  - **Codes:** CPT/HCPCS from the order code, ICD-10-CM from its reason codes.
+  - **Priority:** `urgent`, `asap` or `stat` become expedited.
+  - **Documents:** plain-text attachments become documents, with LOINC 11506-3 (Progress note) mapped to a clinician note.
+- **A pipeline and CLI:** parse, check, send, one JSON log line per message, with IDs and never names or note text.
+
+**Tested:** 11 connector tests. Also run by hand against the real workflow service: the two synthetic bundles became one case ready for review and one pended for its missing sleep questionnaire. Sending them again came back as harmless replays.
+
+**Decision:** a mapping, not a validator. The adapter takes exactly the fields the workflow needs and lists every problem it finds. It makes no claim of FHIR or Da Vinci conformance.
 
 ## License
 

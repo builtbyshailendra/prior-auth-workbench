@@ -1,0 +1,165 @@
+{
+ "resourceType": "Bundle",
+ "id": "fhir-1001",
+ "type": "collection",
+ "identifier": {
+  "system": "https://ehr.example/bundle-id",
+  "value": "fhir-1001"
+ },
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:fhir-1001-patient",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "fhir-1001-patient",
+    "identifier": [
+     {
+      "system": "https://tallowmere.example/fhir/member-id",
+      "value": "SYN-M0010"
+     }
+    ],
+    "name": [
+     {
+      "family": "Ferreira",
+      "given": [
+       "Rowan"
+      ]
+     }
+    ],
+    "birthDate": "1971-04-09"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:fhir-1001-coverage",
+   "resource": {
+    "resourceType": "Coverage",
+    "id": "fhir-1001-coverage",
+    "status": "active",
+    "beneficiary": {
+     "reference": "urn:uuid:fhir-1001-patient"
+    },
+    "payor": [
+     {
+      "display": "Tallowmere Health Plan (fictional)"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:fhir-1001-practitioner",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "fhir-1001-practitioner",
+    "identifier": [
+     {
+      "system": "http://hl7.org/fhir/sid/us-npi",
+      "value": "1234567893"
+     }
+    ],
+    "name": [
+     {
+      "text": "Synthetic Spine Clinic"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:fhir-1001-order",
+   "resource": {
+    "resourceType": "ServiceRequest",
+    "id": "fhir-1001-order",
+    "identifier": [
+     {
+      "system": "https://ehr.example/order-id",
+      "value": "EHR-fhir-1001"
+     }
+    ],
+    "status": "active",
+    "intent": "order",
+    "priority": "routine",
+    "authoredOn": "2026-11-10T14:05:00Z",
+    "code": {
+     "coding": [
+      {
+       "system": "http://www.ama-assn.org/go/cpt",
+       "code": "72148"
+      }
+     ]
+    },
+    "reasonCode": [
+     {
+      "coding": [
+       {
+        "system": "http://hl7.org/fhir/sid/icd-10-cm",
+        "code": "M54.16"
+       }
+      ]
+     }
+    ],
+    "subject": {
+     "reference": "urn:uuid:fhir-1001-patient"
+    },
+    "requester": {
+     "reference": "urn:uuid:fhir-1001-practitioner"
+    },
+    "occurrenceDateTime": "2026-12-07"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:fhir-1001-doc0",
+   "resource": {
+    "resourceType": "DocumentReference",
+    "id": "fhir-1001-doc0",
+    "status": "current",
+    "type": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "11506-3"
+      }
+     ]
+    },
+    "subject": {
+     "reference": "urn:uuid:fhir-1001-patient"
+    },
+    "content": [
+     {
+      "attachment": {
+       "contentType": "text/plain; charset=utf-8",
+       "title": "Progress note 2026-11-09",
+       "data": "U1lOVEhFVElDIE5PVEUgKGZpY3Rpb24pLiA1Mi15ZWFyLW9sZCB3aXRoIGxvdyBiYWNrIHBhaW4gcmFkaWF0aW5nIHRvIHRoZSByaWdodCBsZWcgZm9yIDExIHdlZWtzLiBDb21wbGV0ZWQgOCB3ZWVrcyBvZiBzdXBlcnZpc2VkIHBoeXNpY2FsIHRoZXJhcHkgYW5kIGEgY291cnNlIG9mIGFudGktaW5mbGFtbWF0b3J5IG1lZGljYXRpb24gd2l0aG91dCBsYXN0aW5nIHJlbGllZi4gTm8gcHJpb3IgbHVtYmFyIGltYWdpbmcuIERlbmllcyBib3dlbCBvciBibGFkZGVyIGNoYW5nZXMsIG5vIHNhZGRsZSBudW1ibmVzcywgbm8gZmV2ZXIu"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:fhir-1001-doc1",
+   "resource": {
+    "resourceType": "DocumentReference",
+    "id": "fhir-1001-doc1",
+    "status": "current",
+    "type": {
+     "coding": [
+      {
+       "system": "https://tallowmere.example/fhir/document-type",
+       "code": "conservative_treatment_record"
+      }
+     ]
+    },
+    "subject": {
+     "reference": "urn:uuid:fhir-1001-patient"
+    },
+    "content": [
+     {
+      "attachment": {
+       "contentType": "text/plain; charset=utf-8",
+       "title": "Physical therapy discharge summary",
+       "data": "U1lOVEhFVElDIFJFQ09SRCAoZmljdGlvbikuIDE2IHZpc2l0cyBvdmVyIDggd2Vla3MuIEdvYWxzIHBhcnRseSBtZXQ7IHBhaW4gNi8xMCBhdCBkaXNjaGFyZ2Uu"
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,5 @@
+SYNTHETIC CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Dakota Ferreira (SYN-M0113). Visit date: 2026-11-14.
+History: 6-week history of low back pain radiating to the right leg. No bowel or bladder dysfunction. Lumbar X-ray on 2026-05-14 showed mild degenerative changes.
+Exam: straight leg raise positive on the right; strength 5/5 in both legs; reflexes symmetric.
+Plan: request MRI of the lumbar spine and review after results.

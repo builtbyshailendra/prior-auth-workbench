@@ -1,0 +1,4 @@
+SYNTHETIC SLEEP CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Quinn Iyer (SYN-M0135). Visit date: 2026-11-09.
+History: Loud snoring for several years and daytime sleepiness. Epworth was 3 last year and is 9 today. A home sleep test will be arranged if the lab study is not approved.
+Plan: in-lab polysomnography.

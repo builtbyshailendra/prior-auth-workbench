@@ -1,0 +1,5 @@
+SYNTHETIC CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Morgan Ferreira (SYN-M0110). Visit date: 2026-11-11.
+History: 12-week history of low back pain radiating to the right leg. Has not tried physical therapy. CT of the lumbar spine last year was unremarkable.
+Exam: straight leg raise positive on the right; strength 5/5 in both legs; reflexes symmetric.
+Plan: request MRI of the lumbar spine and review after results.

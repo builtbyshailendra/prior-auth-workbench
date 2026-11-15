@@ -1,0 +1,5 @@
+SYNTHETIC CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Harper Nakamura (SYN-M0103). Visit date: 2026-11-04.
+History: Low back pain radiating to the left leg for 14 weeks. Has not tried physical therapy. History of cancer, treated in 2019.
+Exam: straight leg raise positive on the left; strength 5/5 in both legs; reflexes symmetric.
+Plan: request MRI of the lumbar spine and review after results.

@@ -1,0 +1,304 @@
+{
+ "provider": "rules",
+ "model": "regex-baseline-1",
+ "run_at": "2026-11-15T17:19:54+00:00",
+ "cases": 40,
+ "seconds": 0.0,
+ "failures": 0,
+ "slots": 145,
+ "correct": 110,
+ "present": 110,
+ "found": 85,
+ "false_fills": 10,
+ "wrong_values": 9,
+ "dropped": 0,
+ "accuracy": 0.759,
+ "recall_when_present": 0.773,
+ "usage": {
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "cost_usd": 0.0
+ },
+ "misses": [
+  {
+   "id": "N001",
+   "field": "conservative_therapy_weeks",
+   "label": 0,
+   "got": null,
+   "status": "not_documented",
+   "reason": ""
+  },
+  {
+   "id": "N003",
+   "field": "prior_imaging_done",
+   "label": null,
+   "got": true,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N003",
+   "field": "symptom_duration_weeks",
+   "label": 14,
+   "got": null,
+   "status": "not_documented",
+   "reason": ""
+  },
+  {
+   "id": "N005",
+   "field": "red_flags_present",
+   "label": true,
+   "got": false,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N005",
+   "field": "symptom_duration_weeks",
+   "label": 10,
+   "got": null,
+   "status": "not_documented",
+   "reason": ""
+  },
+  {
+   "id": "N006",
+   "field": "symptom_duration_weeks",
+   "label": 8,
+   "got": null,
+   "status": "not_documented",
+   "reason": ""
+  },
+  {
+   "id": "N007",
+   "field": "prior_imaging_done",
+   "label": null,
+   "got": true,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N008",
+   "field": "conservative_therapy_weeks",
+   "label": 0,
+   "got": null,
+   "status": "not_documented",
+   "reason": ""
+  },
+  {
+   "id": "N009",
+   "field": "symptom_duration_weeks",
+   "label": 14,
+   "got": null,
+   "status": "not_documented",
+   "reason": ""
+  },
+  {
+   "id": "N011",
+   "field": "red_flags_present",
+   "label": true,
+   "got": false,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N011",
+   "field": "prior_imaging_done",
+   "label": null,
+   "got": true,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N011",
+   "field": "symptom_duration_weeks",
+   "label": 10,
+   "got": null,
+   "status": "not_documented",
+   "reason": ""
+  },
+  {
+   "id": "N012",
+   "field": "symptom_duration_weeks",
+   "label": 8,
+   "got": null,
+   "status": "not_documented",
+   "reason": ""
+  },
+  {
+   "id": "N015",
+   "field": "conservative_therapy_weeks",
+   "label": 0,
+   "got": null,
+   "status": "not_documented",
+   "reason": ""
+  },
+  {
+   "id": "N015",
+   "field": "prior_imaging_done",
+   "label": null,
+   "got": true,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N015",
+   "field": "symptom_duration_weeks",
+   "label": 14,
+   "got": null,
+   "status": "not_documented",
+   "reason": ""
+  },
+  {
+   "id": "N017",
+   "field": "red_flags_present",
+   "label": true,
+   "got": false,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N017",
+   "field": "symptom_duration_weeks",
+   "label": 10,
+   "got": null,
+   "status": "not_documented",
+   "reason": ""
+  },
+  {
+   "id": "N018",
+   "field": "symptom_duration_weeks",
+   "label": 8,
+   "got": null,
+   "status": "not_documented",
+   "reason": ""
+  },
+  {
+   "id": "N019",
+   "field": "prior_imaging_done",
+   "label": null,
+   "got": true,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N021",
+   "field": "symptom_duration_weeks",
+   "label": 14,
+   "got": null,
+   "status": "not_documented",
+   "reason": ""
+  },
+  {
+   "id": "N022",
+   "field": "conservative_therapy_weeks",
+   "label": 0,
+   "got": null,
+   "status": "not_documented",
+   "reason": ""
+  },
+  {
+   "id": "N023",
+   "field": "red_flags_present",
+   "label": true,
+   "got": false,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N023",
+   "field": "prior_imaging_done",
+   "label": null,
+   "got": true,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N023",
+   "field": "symptom_duration_weeks",
+   "label": 10,
+   "got": null,
+   "status": "not_documented",
+   "reason": ""
+  },
+  {
+   "id": "N024",
+   "field": "symptom_duration_weeks",
+   "label": 8,
+   "got": null,
+   "status": "not_documented",
+   "reason": ""
+  },
+  {
+   "id": "N026",
+   "field": "epworth_score",
+   "label": 12,
+   "got": 6,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N026",
+   "field": "witnessed_apneas",
+   "label": null,
+   "got": false,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N029",
+   "field": "epworth_score",
+   "label": 16,
+   "got": 10,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N030",
+   "field": "witnessed_apneas",
+   "label": null,
+   "got": false,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N032",
+   "field": "epworth_score",
+   "label": 20,
+   "got": 14,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N034",
+   "field": "witnessed_apneas",
+   "label": null,
+   "got": false,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N035",
+   "field": "epworth_score",
+   "label": 9,
+   "got": 3,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N038",
+   "field": "epworth_score",
+   "label": 14,
+   "got": 8,
+   "status": "verified",
+   "reason": ""
+  },
+  {
+   "id": "N038",
+   "field": "witnessed_apneas",
+   "label": null,
+   "got": false,
+   "status": "verified",
+   "reason": ""
+  }
+ ]
+}

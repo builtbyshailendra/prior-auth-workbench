@@ -1,0 +1,4 @@
+SYNTHETIC SLEEP CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Avery Okonkwo (SYN-M0128). Visit date: 2026-11-02.
+History: Loud snoring for several years and daytime sleepiness. Epworth Sleepiness Scale score of 9. Has not had a home sleep test. Partner reports pauses in breathing at night.
+Plan: in-lab polysomnography.

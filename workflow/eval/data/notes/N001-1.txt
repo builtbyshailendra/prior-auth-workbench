@@ -1,0 +1,5 @@
+SYNTHETIC CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Morgan Castellano (SYN-M0101). Visit date: 2026-11-02.
+History: 6-week history of low back pain radiating to the left leg. Physical therapy was recommended at the last visit but has not been started. No bowel or bladder dysfunction. Lumbar X-ray on 2026-02-11 showed mild degenerative changes.
+Exam: straight leg raise positive on the left; strength 5/5 in both legs; reflexes symmetric.
+Plan: request MRI of the lumbar spine and review after results.

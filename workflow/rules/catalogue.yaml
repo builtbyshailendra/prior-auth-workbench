@@ -8,7 +8,7 @@
 # medical director (see docs/discovery/04-stakeholders.md). Every change bumps
 # `version`, and each case records the version it was checked against.
 
-version: "2026.11-1"
+version: "2026.11-2"
 
 services:
   "72148":
@@ -22,7 +22,7 @@ services:
     facts:
       - conservative_therapy_weeks
       - red_flags_present
-      - prior_imaging
+      - prior_imaging_done
       - symptom_duration_weeks
 
   "95810":
@@ -36,7 +36,7 @@ services:
     facts:
       - epworth_score
       - home_sleep_test_done
-      - suspected_condition
+      - witnessed_apneas
 
   "97110":
     name: Physical therapy beyond the plan's visit limit

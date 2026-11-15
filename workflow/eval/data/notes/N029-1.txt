@@ -1,0 +1,4 @@
+SYNTHETIC SLEEP CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Jordan Castellano (SYN-M0129). Visit date: 2026-11-03.
+History: Loud snoring for several years and daytime sleepiness. Epworth was 10 last year and is 16 today. Home sleep apnea test on 2026-09-20 was inconclusive. Bed partner has not noticed any pauses in breathing.
+Plan: in-lab polysomnography.

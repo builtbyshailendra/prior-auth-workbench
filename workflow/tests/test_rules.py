@@ -106,7 +106,7 @@ def test_open_ended_coverage_and_gaps():
 
 def test_the_real_catalogue_loads():
     cat = catalogue.load()
-    assert cat.version == "2026.11-1"
+    assert cat.version == "2026.11-2"
     assert cat.needs_authorization("72148")
     assert not cat.needs_authorization("99213")  # AS-05
     assert not cat.needs_authorization("12345")  # not in the catalogue at all

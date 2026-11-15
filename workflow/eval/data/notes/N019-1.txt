@@ -1,0 +1,5 @@
+SYNTHETIC CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Reese Okonkwo (SYN-M0119). Visit date: 2026-11-20.
+History: 6-week history of low back pain radiating to the right leg. No bowel or bladder dysfunction.
+Exam: straight leg raise positive on the right; strength 5/5 in both legs; reflexes symmetric.
+Plan: request MRI of the lumbar spine and review after results.

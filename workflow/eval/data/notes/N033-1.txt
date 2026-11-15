@@ -1,0 +1,4 @@
+SYNTHETIC SLEEP CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Morgan Adeyemi (SYN-M0133). Visit date: 2026-11-07.
+History: Loud snoring for several years and daytime sleepiness. ESS 12/24 today. Home sleep apnea test on 2026-09-20 was inconclusive. Bed partner has not noticed any pauses in breathing.
+Plan: in-lab polysomnography.

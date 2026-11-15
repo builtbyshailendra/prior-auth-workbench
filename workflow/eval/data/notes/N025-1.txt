@@ -1,0 +1,5 @@
+SYNTHETIC CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Dakota Iyer (SYN-M0125). Visit date: 2026-11-26.
+History: 6-week history of low back pain radiating to the right leg. Doing home exercises from a handout. No bowel or bladder dysfunction. Lumbar X-ray on 2026-08-17 showed mild degenerative changes.
+Exam: straight leg raise positive on the right; strength 5/5 in both legs; reflexes symmetric.
+Plan: request MRI of the lumbar spine and review after results.

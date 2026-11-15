@@ -1,0 +1,5 @@
+SYNTHETIC CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Emerson Nakamura (SYN-M0118). Visit date: 2026-11-19.
+History: Low back pain radiating to the left leg for 8 weeks. Doing home exercises from a handout. Reports new urinary retention and numbness in the saddle area. CT of the lumbar spine last year was unremarkable.
+Exam: straight leg raise positive on the left; strength 5/5 in both legs; reflexes symmetric.
+Plan: request MRI of the lumbar spine and review after results.

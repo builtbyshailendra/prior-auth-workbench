@@ -1,0 +1,5 @@
+SYNTHETIC CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Harper Adeyemi (SYN-M0102). Visit date: 2026-11-03.
+History: Low back pain radiating to the right leg. Completed 8 weeks of physical therapy without lasting relief. Denies bowel or bladder changes, saddle numbness or fever. CT of the lumbar spine last year was unremarkable.
+Exam: straight leg raise positive on the right; strength 5/5 in both legs; reflexes symmetric.
+Plan: request MRI of the lumbar spine and review after results.

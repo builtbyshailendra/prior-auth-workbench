@@ -1,0 +1,5 @@
+SYNTHETIC CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Sawyer Castellano (SYN-M0108). Visit date: 2026-11-09.
+History: Low back pain radiating to the left leg. Physical therapy was recommended at the last visit but has not been started. Denies bowel or bladder changes, saddle numbness or fever. No prior imaging of the spine.
+Exam: straight leg raise positive on the left; strength 5/5 in both legs; reflexes symmetric.
+Plan: request MRI of the lumbar spine and review after results.

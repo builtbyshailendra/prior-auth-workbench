@@ -1,0 +1,5 @@
+SYNTHETIC CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Harper Petrov (SYN-M0104). Visit date: 2026-11-05.
+History: 12-week history of low back pain radiating to the left leg. Doing home exercises from a handout. No prior imaging of the spine.
+Exam: straight leg raise positive on the left; strength 5/5 in both legs; reflexes symmetric.
+Plan: request MRI of the lumbar spine and review after results.

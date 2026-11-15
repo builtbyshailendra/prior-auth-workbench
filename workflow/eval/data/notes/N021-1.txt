@@ -1,0 +1,5 @@
+SYNTHETIC CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Casey Castellano (SYN-M0121). Visit date: 2026-11-22.
+History: Low back pain radiating to the right leg for 14 weeks. PT x 6 wks with minimal improvement. History of cancer, treated in 2019. Lumbar X-ray on 2026-04-13 showed mild degenerative changes.
+Exam: straight leg raise positive on the right; strength 5/5 in both legs; reflexes symmetric.
+Plan: request MRI of the lumbar spine and review after results.

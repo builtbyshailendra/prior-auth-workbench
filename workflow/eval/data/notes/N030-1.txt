@@ -1,0 +1,4 @@
+SYNTHETIC SLEEP CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Dakota Nakamura (SYN-M0130). Visit date: 2026-11-04.
+History: Loud snoring for several years and daytime sleepiness. Lives alone; no one has witnessed whether breathing stops at night.
+Plan: in-lab polysomnography.

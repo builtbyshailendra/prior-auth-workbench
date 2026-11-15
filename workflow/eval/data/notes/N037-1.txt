@@ -1,0 +1,4 @@
+SYNTHETIC SLEEP CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Sawyer Brennan (SYN-M0137). Visit date: 2026-11-11.
+History: Loud snoring for several years and daytime sleepiness. Home sleep apnea test on 2026-09-20 was inconclusive. Bed partner has not noticed any pauses in breathing.
+Plan: in-lab polysomnography.

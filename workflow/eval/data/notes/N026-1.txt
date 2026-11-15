@@ -1,0 +1,4 @@
+SYNTHETIC SLEEP CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Harper Nakamura (SYN-M0126). Visit date: 2026-11-27.
+History: Loud snoring for several years and daytime sleepiness. Epworth was 6 last year and is 12 today. Lives alone; no one has witnessed whether breathing stops at night.
+Plan: in-lab polysomnography.

@@ -1,0 +1,4 @@
+SYNTHETIC SLEEP CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Dakota Lindqvist (SYN-M0139). Visit date: 2026-11-13.
+History: Loud snoring for several years and daytime sleepiness. ESS 20/24 today. A home sleep test will be arranged if the lab study is not approved.
+Plan: in-lab polysomnography.

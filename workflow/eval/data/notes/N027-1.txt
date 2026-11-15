@@ -1,0 +1,4 @@
+SYNTHETIC SLEEP CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Emerson Nakamura (SYN-M0127). Visit date: 2026-11-01.
+History: Loud snoring for several years and daytime sleepiness. ESS 18/24 today. A home sleep test will be arranged if the lab study is not approved.
+Plan: in-lab polysomnography.

@@ -1,6 +1,6 @@
 # prior-auth-workbench
 
-![Status](https://img.shields.io/badge/status-step%208%20of%2015-orange)
+![Status](https://img.shields.io/badge/status-step%209%20of%2015-orange)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 **A prior-authorization request arrives from any of four source systems, gets checked against the health plan's documentation rules, has its key facts pulled out of the clinical notes with quotes as proof, and lands in a queue where people decide, on the clock CMS sets.**
@@ -39,7 +39,7 @@ flowchart LR
 | A. Discovery | 1. Discovery pack | ✅ Done |
 | B. Core workflow | 2. Rules and validation · 3. Case lifecycle, audit, clocks · 4. Sign-in and permissions · 5. Reviewer screen | ✅ Done |
 | C. Integrations | 6. Connector service and FHIR · 7. X12 278, fax and CRM · 8. Reliability | ✅ Done |
-| D. Bounded AI | 9. Labelled test set · 10. Extraction with checked quotes · 11. Reviewer summary | |
+| D. Bounded AI | 9. Labelled test set · 10. Extraction with checked quotes · 11. Reviewer summary | In progress |
 | E. Operate | 12. Containers and CI · 13. Deploy, rollback and outage drills | |
 | F. Outcome | 14. Measure · 15. Business case and demo | |
 
@@ -224,6 +224,24 @@ Replays are safe because the workflow service treats (source, source_id) as one 
 - **Sent again:** the same message came back as a harmless replay.
 
 **Changed my mind:** fax messages were identified by their row number in the index. A corrected index can move rows, so replay matches them by fax ID instead.
+
+### Step 9: a labelled test set before any AI
+
+**Built:**
+- **The test set:** 40 synthetic clinical notes with the correct answers written down ([`workflow/eval`](workflow/eval/README.md)), 25 for lumbar spine MRI and 15 for sleep studies, generated from sentence templates so the labels can't drift from the text. It includes traps:
+  - a negation next to a red flag
+  - an MRI mentioned only in the plan
+  - last year's score next to today's
+  - "no one has witnessed", which means unknown, not no
+- **The verifier the app will use on every extracted fact:** the quote must appear in a document, numbers must appear in their quote, values must have the right type.
+- **A scoring script** that reports false fills (a value where the note says nothing) separately, because that's the most dangerous error.
+- **A rule-based baseline** to beat.
+
+**Result:** the rules baseline gets 110 of 145 answers right (75.9%), with 10 false fills.
+
+**What broke:** the baseline exposed a bug in my verifier. "Has not tried physical therapy" means 0 weeks, but the rule "the number must appear in its quote" dropped every correct zero. Zero now passes when the quote says something wasn't done.
+
+**Decision:** the test set and scoring come before the model. Without them, "the AI is accurate" would only be an impression. The Claude row in the results table stays empty until it's actually run.
 
 ## License
 

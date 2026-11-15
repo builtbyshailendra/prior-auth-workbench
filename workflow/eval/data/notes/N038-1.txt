@@ -1,0 +1,4 @@
+SYNTHETIC SLEEP CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Rowan Castellano (SYN-M0138). Visit date: 2026-11-12.
+History: Loud snoring for several years and daytime sleepiness. Epworth was 8 last year and is 14 today. Lives alone; no one has witnessed whether breathing stops at night.
+Plan: in-lab polysomnography.

@@ -1,0 +1,513 @@
+{
+ "seed": 20261116,
+ "cases": [
+  {
+   "id": "N001",
+   "service_code": "72148",
+   "documents": [
+    "notes/N001-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 6,
+    "conservative_therapy_weeks": 0,
+    "red_flags_present": false,
+    "prior_imaging_done": true
+   }
+  },
+  {
+   "id": "N002",
+   "service_code": "72148",
+   "documents": [
+    "notes/N002-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": null,
+    "conservative_therapy_weeks": 8,
+    "red_flags_present": false,
+    "prior_imaging_done": true
+   }
+  },
+  {
+   "id": "N003",
+   "service_code": "72148",
+   "documents": [
+    "notes/N003-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 14,
+    "conservative_therapy_weeks": 0,
+    "red_flags_present": true,
+    "prior_imaging_done": null
+   }
+  },
+  {
+   "id": "N004",
+   "service_code": "72148",
+   "documents": [
+    "notes/N004-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 12,
+    "conservative_therapy_weeks": null,
+    "red_flags_present": null,
+    "prior_imaging_done": false
+   }
+  },
+  {
+   "id": "N005",
+   "service_code": "72148",
+   "documents": [
+    "notes/N005-1.txt",
+    "notes/N005-2.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 10,
+    "conservative_therapy_weeks": 8,
+    "red_flags_present": true,
+    "prior_imaging_done": true
+   }
+  },
+  {
+   "id": "N006",
+   "service_code": "72148",
+   "documents": [
+    "notes/N006-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 8,
+    "conservative_therapy_weeks": null,
+    "red_flags_present": true,
+    "prior_imaging_done": true
+   }
+  },
+  {
+   "id": "N007",
+   "service_code": "72148",
+   "documents": [
+    "notes/N007-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 6,
+    "conservative_therapy_weeks": 4,
+    "red_flags_present": false,
+    "prior_imaging_done": null
+   }
+  },
+  {
+   "id": "N008",
+   "service_code": "72148",
+   "documents": [
+    "notes/N008-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": null,
+    "conservative_therapy_weeks": 0,
+    "red_flags_present": false,
+    "prior_imaging_done": false
+   }
+  },
+  {
+   "id": "N009",
+   "service_code": "72148",
+   "documents": [
+    "notes/N009-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 14,
+    "conservative_therapy_weeks": 6,
+    "red_flags_present": true,
+    "prior_imaging_done": true
+   }
+  },
+  {
+   "id": "N010",
+   "service_code": "72148",
+   "documents": [
+    "notes/N010-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 12,
+    "conservative_therapy_weeks": 0,
+    "red_flags_present": null,
+    "prior_imaging_done": true
+   }
+  },
+  {
+   "id": "N011",
+   "service_code": "72148",
+   "documents": [
+    "notes/N011-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 10,
+    "conservative_therapy_weeks": null,
+    "red_flags_present": true,
+    "prior_imaging_done": null
+   }
+  },
+  {
+   "id": "N012",
+   "service_code": "72148",
+   "documents": [
+    "notes/N012-1.txt",
+    "notes/N012-2.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 8,
+    "conservative_therapy_weeks": 6,
+    "red_flags_present": true,
+    "prior_imaging_done": false
+   }
+  },
+  {
+   "id": "N013",
+   "service_code": "72148",
+   "documents": [
+    "notes/N013-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 6,
+    "conservative_therapy_weeks": null,
+    "red_flags_present": false,
+    "prior_imaging_done": true
+   }
+  },
+  {
+   "id": "N014",
+   "service_code": "72148",
+   "documents": [
+    "notes/N014-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": null,
+    "conservative_therapy_weeks": 8,
+    "red_flags_present": false,
+    "prior_imaging_done": true
+   }
+  },
+  {
+   "id": "N015",
+   "service_code": "72148",
+   "documents": [
+    "notes/N015-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 14,
+    "conservative_therapy_weeks": 0,
+    "red_flags_present": true,
+    "prior_imaging_done": null
+   }
+  },
+  {
+   "id": "N016",
+   "service_code": "72148",
+   "documents": [
+    "notes/N016-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 12,
+    "conservative_therapy_weeks": 4,
+    "red_flags_present": null,
+    "prior_imaging_done": false
+   }
+  },
+  {
+   "id": "N017",
+   "service_code": "72148",
+   "documents": [
+    "notes/N017-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 10,
+    "conservative_therapy_weeks": 0,
+    "red_flags_present": true,
+    "prior_imaging_done": true
+   }
+  },
+  {
+   "id": "N018",
+   "service_code": "72148",
+   "documents": [
+    "notes/N018-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 8,
+    "conservative_therapy_weeks": null,
+    "red_flags_present": true,
+    "prior_imaging_done": true
+   }
+  },
+  {
+   "id": "N019",
+   "service_code": "72148",
+   "documents": [
+    "notes/N019-1.txt",
+    "notes/N019-2.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 6,
+    "conservative_therapy_weeks": 4,
+    "red_flags_present": false,
+    "prior_imaging_done": null
+   }
+  },
+  {
+   "id": "N020",
+   "service_code": "72148",
+   "documents": [
+    "notes/N020-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": null,
+    "conservative_therapy_weeks": null,
+    "red_flags_present": false,
+    "prior_imaging_done": false
+   }
+  },
+  {
+   "id": "N021",
+   "service_code": "72148",
+   "documents": [
+    "notes/N021-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 14,
+    "conservative_therapy_weeks": 6,
+    "red_flags_present": true,
+    "prior_imaging_done": true
+   }
+  },
+  {
+   "id": "N022",
+   "service_code": "72148",
+   "documents": [
+    "notes/N022-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 12,
+    "conservative_therapy_weeks": 0,
+    "red_flags_present": null,
+    "prior_imaging_done": true
+   }
+  },
+  {
+   "id": "N023",
+   "service_code": "72148",
+   "documents": [
+    "notes/N023-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 10,
+    "conservative_therapy_weeks": 8,
+    "red_flags_present": true,
+    "prior_imaging_done": null
+   }
+  },
+  {
+   "id": "N024",
+   "service_code": "72148",
+   "documents": [
+    "notes/N024-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 8,
+    "conservative_therapy_weeks": 0,
+    "red_flags_present": true,
+    "prior_imaging_done": false
+   }
+  },
+  {
+   "id": "N025",
+   "service_code": "72148",
+   "documents": [
+    "notes/N025-1.txt"
+   ],
+   "labels": {
+    "symptom_duration_weeks": 6,
+    "conservative_therapy_weeks": null,
+    "red_flags_present": false,
+    "prior_imaging_done": true
+   }
+  },
+  {
+   "id": "N026",
+   "service_code": "95810",
+   "documents": [
+    "notes/N026-1.txt"
+   ],
+   "labels": {
+    "epworth_score": 12,
+    "home_sleep_test_done": null,
+    "witnessed_apneas": null
+   }
+  },
+  {
+   "id": "N027",
+   "service_code": "95810",
+   "documents": [
+    "notes/N027-1.txt"
+   ],
+   "labels": {
+    "epworth_score": 18,
+    "home_sleep_test_done": false,
+    "witnessed_apneas": null
+   }
+  },
+  {
+   "id": "N028",
+   "service_code": "95810",
+   "documents": [
+    "notes/N028-1.txt"
+   ],
+   "labels": {
+    "epworth_score": 9,
+    "home_sleep_test_done": false,
+    "witnessed_apneas": true
+   }
+  },
+  {
+   "id": "N029",
+   "service_code": "95810",
+   "documents": [
+    "notes/N029-1.txt"
+   ],
+   "labels": {
+    "epworth_score": 16,
+    "home_sleep_test_done": true,
+    "witnessed_apneas": false
+   }
+  },
+  {
+   "id": "N030",
+   "service_code": "95810",
+   "documents": [
+    "notes/N030-1.txt"
+   ],
+   "labels": {
+    "epworth_score": null,
+    "home_sleep_test_done": null,
+    "witnessed_apneas": null
+   }
+  },
+  {
+   "id": "N031",
+   "service_code": "95810",
+   "documents": [
+    "notes/N031-1.txt"
+   ],
+   "labels": {
+    "epworth_score": 14,
+    "home_sleep_test_done": false,
+    "witnessed_apneas": null
+   }
+  },
+  {
+   "id": "N032",
+   "service_code": "95810",
+   "documents": [
+    "notes/N032-1.txt"
+   ],
+   "labels": {
+    "epworth_score": 20,
+    "home_sleep_test_done": false,
+    "witnessed_apneas": true
+   }
+  },
+  {
+   "id": "N033",
+   "service_code": "95810",
+   "documents": [
+    "notes/N033-1.txt"
+   ],
+   "labels": {
+    "epworth_score": 12,
+    "home_sleep_test_done": true,
+    "witnessed_apneas": false
+   }
+  },
+  {
+   "id": "N034",
+   "service_code": "95810",
+   "documents": [
+    "notes/N034-1.txt"
+   ],
+   "labels": {
+    "epworth_score": 18,
+    "home_sleep_test_done": null,
+    "witnessed_apneas": null
+   }
+  },
+  {
+   "id": "N035",
+   "service_code": "95810",
+   "documents": [
+    "notes/N035-1.txt"
+   ],
+   "labels": {
+    "epworth_score": 9,
+    "home_sleep_test_done": false,
+    "witnessed_apneas": null
+   }
+  },
+  {
+   "id": "N036",
+   "service_code": "95810",
+   "documents": [
+    "notes/N036-1.txt"
+   ],
+   "labels": {
+    "epworth_score": 16,
+    "home_sleep_test_done": false,
+    "witnessed_apneas": true
+   }
+  },
+  {
+   "id": "N037",
+   "service_code": "95810",
+   "documents": [
+    "notes/N037-1.txt"
+   ],
+   "labels": {
+    "epworth_score": null,
+    "home_sleep_test_done": true,
+    "witnessed_apneas": false
+   }
+  },
+  {
+   "id": "N038",
+   "service_code": "95810",
+   "documents": [
+    "notes/N038-1.txt"
+   ],
+   "labels": {
+    "epworth_score": 14,
+    "home_sleep_test_done": null,
+    "witnessed_apneas": null
+   }
+  },
+  {
+   "id": "N039",
+   "service_code": "95810",
+   "documents": [
+    "notes/N039-1.txt"
+   ],
+   "labels": {
+    "epworth_score": 20,
+    "home_sleep_test_done": false,
+    "witnessed_apneas": null
+   }
+  },
+  {
+   "id": "N040",
+   "service_code": "95810",
+   "documents": [
+    "notes/N040-1.txt"
+   ],
+   "labels": {
+    "epworth_score": 12,
+    "home_sleep_test_done": false,
+    "witnessed_apneas": true
+   }
+  }
+ ]
+}

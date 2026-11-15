@@ -1,0 +1,4 @@
+SYNTHETIC SLEEP CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Quinn Nakamura (SYN-M0134). Visit date: 2026-11-08.
+History: Loud snoring for several years and daytime sleepiness. Epworth Sleepiness Scale score of 18. Lives alone; no one has witnessed whether breathing stops at night.
+Plan: in-lab polysomnography.

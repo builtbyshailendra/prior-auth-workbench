@@ -1,0 +1,4 @@
+SYNTHETIC SLEEP CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Avery Castellano (SYN-M0136). Visit date: 2026-11-10.
+History: Loud snoring for several years and daytime sleepiness. ESS 16/24 today. Has not had a home sleep test. Partner reports pauses in breathing at night.
+Plan: in-lab polysomnography.

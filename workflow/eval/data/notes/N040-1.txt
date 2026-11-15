@@ -1,0 +1,4 @@
+SYNTHETIC SLEEP CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Avery Iyer (SYN-M0140). Visit date: 2026-11-14.
+History: Loud snoring for several years and daytime sleepiness. Epworth Sleepiness Scale score of 12. Has not had a home sleep test. Partner reports pauses in breathing at night.
+Plan: in-lab polysomnography.

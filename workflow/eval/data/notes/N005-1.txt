@@ -1,0 +1,5 @@
+SYNTHETIC CLINIC NOTE - fiction written for software testing, not a real patient.
+Patient: Harper Nakamura (SYN-M0105). Visit date: 2026-11-06.
+History: Low back pain radiating to the right leg, ongoing for ten weeks. No fever, but reports new saddle numbness since Tuesday. Lumbar X-ray on 2026-06-15 showed mild degenerative changes.
+Exam: straight leg raise positive on the right; strength 5/5 in both legs; reflexes symmetric.
+Plan: request MRI of the lumbar spine and review after results.

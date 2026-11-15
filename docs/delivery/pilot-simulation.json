@@ -1,0 +1,94 @@
+{
+ "run_at": "2026-11-15T17:47:29+00:00",
+ "seconds": 42.6,
+ "requests": 200,
+ "seed": 7,
+ "extractor": "rules baseline (no API key)",
+ "intake_outcomes": {
+  "201:pended": 53,
+  "201:received": 104,
+  "201:ready_for_review": 16,
+  "201:closed_no_auth": 10,
+  "422:None": 11,
+  "201:closed_ineligible": 5,
+  "200:received": 1
+ },
+ "rfi_answered_by_providers": 42,
+ "extraction_jobs_handled": 139,
+ "reviewers": {
+  "reviewed": 162,
+  "verified_correct": 295,
+  "entered": 61,
+  "corrected": 64,
+  "approved": 130,
+  "escalated": 47,
+  "denied": 32,
+  "summaries_accepted": 63,
+  "summaries_edited": 76
+ },
+ "operations_report": {
+  "cases_by_state": {
+   "closed_ineligible": 5,
+   "denied": 32,
+   "closed_no_auth": 10,
+   "approved": 130,
+   "pended": 11
+  },
+  "rfi_rate_percent": 30.6,
+  "intake_to_nurse_queue_seconds": {
+   "cases": 120,
+   "median": 6.02,
+   "p95": 10.1,
+   "max": 11.17
+  },
+  "extraction_runs": {
+   "rules:ok": 139
+  },
+  "current_facts": {
+   "rules:not_documented": 89,
+   "manual:entered": 125,
+   "rules:verified": 295
+  },
+  "verified_facts_corrected_by_reviewers": 64,
+  "unverified_facts_filled_in_by_reviewers": 61,
+  "summaries": {
+   "edited": 76,
+   "accepted": 63,
+   "accepted_unchanged_percent": 45.3
+  },
+  "open_cases_by_risk": {
+   "on_track": 11
+  },
+  "extraction_cost_usd": 0.0
+ },
+ "cms_report": {
+  "period": {
+   "start": "2026-01-01T00:00:00+00:00",
+   "end": "2027-01-01T00:00:00+00:00"
+  },
+  "services_requiring_authorization": [
+   "72148 Lumbar spine MRI",
+   "95810 Sleep study in a sleep lab",
+   "97110 Physical therapy beyond the plan's visit limit"
+  ],
+  "decisions": 162,
+  "percent_approved": 80.2,
+  "percent_denied": 19.8,
+  "percent_approved_after_appeal": "not tracked: appeals are outside the pilot",
+  "decision_time_standard": {
+   "count": 133,
+   "average_hours": 79.8,
+   "median_hours": 75.0
+  },
+  "decision_time_expedited": {
+   "count": 29,
+   "average_hours": 34.6,
+   "median_hours": 30.5
+  }
+ },
+ "simulated": [
+  "receipt times back-dated by the script",
+  "reviewers and their decisions are code following an illustrative policy",
+  "requests sent in the internal format, not through the connector adapters"
+ ]
+}

@@ -29,7 +29,7 @@ from app.auth import (
     sign_in,
 )
 from app.db import SessionLocal, create_schema, get_session
-from app import observability, review
+from app import observability, reports, review
 from app.extraction import service as extraction
 from app.intake import CaseClosed, IntakeRejected, add_documents, open_rfi, receive
 from app.lifecycle import REASON_CODES, Invalid, NotAllowed, WrongState, can_view, take, visible_to
@@ -345,6 +345,23 @@ def post_extraction(case_id: int, payload: ExtractionResultIn, request: Request,
         raise HTTPException(404, "No such case")
     return {"case_id": case.id, "state": case.state, "extraction_status": case.extraction_status,
             "facts": [{"field": f.field, "status": f.status} for f in case.facts]}
+
+
+# --- reports (aggregates only) -------------------------------------------------------------
+
+@app.get("/api/reports/cms")
+def report_cms(year: int, session: Session = Depends(get_session),
+               _: Principal = Depends(require("medical_director", "admin"))) -> dict:
+    """The yearly prior-authorization metrics CMS-0057-F asks payers to publish, for decisions made in that year."""
+    from datetime import UTC, datetime
+
+    return reports.cms_metrics(session, CATALOGUE, datetime(year, 1, 1, tzinfo=UTC), datetime(year + 1, 1, 1, tzinfo=UTC))
+
+
+@app.get("/api/reports/operations")
+def report_operations(session: Session = Depends(get_session),
+                      _: Principal = Depends(require("medical_director", "admin"))) -> dict:
+    return reports.operations(session)
 
 
 # --- users (admin only) --------------------------------------------------------------

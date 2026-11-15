@@ -1,6 +1,6 @@
 # prior-auth-workbench
 
-![Status](https://img.shields.io/badge/status-step%2013%20of%2015-orange)
+![Status](https://img.shields.io/badge/status-step%2014%20of%2015-orange)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 **A prior-authorization request arrives from any of four source systems, gets checked against the health plan's documentation rules, has its key facts pulled out of the clinical notes with quotes as proof, and lands in a queue where people decide, on the clock CMS sets.**
@@ -40,8 +40,8 @@ flowchart LR
 | B. Core workflow | 2. Rules and validation · 3. Case lifecycle, audit, clocks · 4. Sign-in and permissions · 5. Reviewer screen | ✅ Done |
 | C. Integrations | 6. Connector service and FHIR · 7. X12 278, fax and CRM · 8. Reliability | ✅ Done |
 | D. Bounded AI | 9. Labelled test set · 10. Extraction with checked quotes · 11. Reviewer summary | ✅ Done |
-| E. Operate | 12. Containers and CI · 13. Deploy, rollback and outage drills | In progress |
-| F. Outcome | 14. Measure · 15. Business case and demo | |
+| E. Operate | 12. Containers and CI · 13. Deploy, rollback and outage drills | ✅ Done |
+| F. Outcome | 14. Measure · 15. Business case and demo | In progress |
 
 ## Discovery pack
 
@@ -339,6 +339,25 @@ AS-08 (a made-up quote is dropped) and AS-09 (AI failure or silence goes to manu
 - **Database outage:** the workflow pods must go not-ready without being restarted, and recover by themselves.
 
 **Checked locally:** `kubectl kustomize`, shellcheck and actionlint. The cluster runs only in CI. The results go in the next entry.
+
+### Step 14: measure
+
+**Built:**
+- **Reports** for medical directors and admins:
+  - **CMS-style yearly metrics:** services needing authorization, percent approved and denied, average and median decision times by priority, and appeals marked "not tracked". Checked against a hand calculation (AS-14).
+  - **An operations report:** time from intake to the nurse queue from the audit trail's clock, request-for-information rate, extraction outcomes, facts reviewers corrected or filled in, summaries accepted unchanged, open cases by deadline risk, and AI cost.
+- **A simulated pilot:** 200 synthetic requests through the running service, with the real extraction worker (rules baseline) and code playing the reviewers ([write-up](docs/delivery/pilot-simulation.md)).
+
+**Measured:**
+- **Intake to the nurse queue:** median 6.0 seconds, 95th percentile 10.1 seconds.
+- **The rules baseline:** reviewers had to correct 64 of the 359 facts it verified (18%) and fill in 61 more.
+- **Summaries:** 45% were accepted unchanged.
+
+**Set by the script, not results:** the request-for-information rate, the approval rate and the decision times. The write-up labels these.
+
+**What this says:** the software side is fast enough. The rules baseline doesn't save reviewer work, because one in five of its "verified" facts is a misread real sentence. Whether Claude does better is the open question, and the test set is ready to answer it once there's an API key.
+
+**Not done:** timing a real person reviewing with and without the facts. The [peer-review protocol](docs/delivery/peer-review.md) is written, and it says plainly that it hasn't happened yet.
 
 ## License
 

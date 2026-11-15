@@ -1,11 +1,16 @@
 # prior-auth-workbench
 
-![Status](https://img.shields.io/badge/status-step%2014%20of%2015-orange)
+[![ci](https://github.com/builtbyshailendra/prior-auth-workbench/actions/workflows/ci.yml/badge.svg)](https://github.com/builtbyshailendra/prior-auth-workbench/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/python-3.12-3776AB)
+![TypeScript](https://img.shields.io/badge/typescript-5.9-3178C6)
+![PostgreSQL](https://img.shields.io/badge/postgresql-16-4169E1)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 **A prior-authorization request arrives from any of four source systems, gets checked against the health plan's documentation rules, has its key facts pulled out of the clinical notes with quotes as proof, and lands in a queue where people decide, on the clock CMS sets.**
 
-> Personal learning project. Tallowmere Health Plan, every member, provider, request and note here is made up. The AI gathers and drafts; it never approves or denies. Nothing here is medical policy or a claim of HIPAA or Da Vinci conformance.
+> Personal learning project. Tallowmere Health Plan, every member, provider, request and note here is made up. The AI gathers and drafts; it never approves or denies. Nothing here is medical policy, and nothing claims HIPAA or Da Vinci conformance.
+
+![Facts next to their quotes](docs/screenshots/4-facts-with-quotes.png)
 
 ## Why
 
@@ -23,37 +28,65 @@ The interesting part isn't an AI that reads documents. It's everything around it
 - proving every fact with a quote
 - running reliably
 
-## The plan
+## What it does
 
 ```mermaid
 flowchart LR
-    S["Source systems<br/>FHIR R4 · X12 278 · fax · CRM"] --> C["Connectors<br/>(TypeScript)"]
+    S["Source systems<br/>FHIR R4 · X12 278 · fax · CRM"] --> C["Connectors<br/>(TypeScript)<br/>retries · outbox"]
     C --> W["Workflow<br/>(Python, PostgreSQL)<br/>rules · checklists · clocks · audit"]
-    W --> A["AI step<br/>facts + checked quotes"]
-    A --> R["Reviewer screen<br/>(Next.js)"]
+    W <--> K["Extraction worker<br/>Claude or rules<br/>extractor token only"]
+    W --> R["Reviewer screen<br/>(Next.js)"]
     R --> D{"Nurse / medical director<br/>decide"}
 ```
 
-| Stage | Steps | Status |
+| Part | Where | What it does |
 |---|---|---|
-| A. Discovery | 1. Discovery pack | ✅ Done |
-| B. Core workflow | 2. Rules and validation · 3. Case lifecycle, audit, clocks · 4. Sign-in and permissions · 5. Reviewer screen | ✅ Done |
-| C. Integrations | 6. Connector service and FHIR · 7. X12 278, fax and CRM · 8. Reliability | ✅ Done |
-| D. Bounded AI | 9. Labelled test set · 10. Extraction with checked quotes · 11. Reviewer summary | ✅ Done |
-| E. Operate | 12. Containers and CI · 13. Deploy, rollback and outage drills | ✅ Done |
-| F. Outcome | 14. Measure · 15. Business case and demo | In progress |
+| Discovery | [`docs/discovery`](docs/discovery/README.md) | Problem, current and future process, stakeholders, 33 requirements, 14 acceptance scenarios, standards primer, workshop plan. Written before any code |
+| Connectors | [`connectors/`](connectors) | FHIR R4 bundles, a narrow X12 278 parser, fax index rows and CRM records become one internal request. Retries with backoff, parked and rejected records, replay |
+| Workflow | [`workflow/`](workflow) | Intake checks (coverage on the date, NPI check digit, code formats), duplicate linking across channels, one request listing every missing document, 72-hour / 7-day clocks, an action table for who may decide what, an append-only audit trail, reports |
+| Extraction | [`workflow/app/extraction`](workflow/app/extraction) | A worker holding only the extractor token claims cases and sends raw answers. The workflow checks every quote against the documents before anyone sees it. Failures go to manual entry |
+| Reviewer screen | [`web/`](web) | Sign-in, a queue per person sorted by deadline, facts next to their quotes, manual entry and correction, a summary built from checked facts, decisions |
+| Deployment | [`deploy/`](deploy), [`compose.yaml`](compose.yaml) | Images, compose, Kubernetes (kustomize), a deploy script that rolls back a bad release |
+| Delivery | [`docs/delivery`](docs/delivery) | Business case and ROI calculator, roadmap, simulated pilot, UAT script, traceability, demo script, product feedback |
+| Operations | [`docs/operations`](docs/operations) | Runbook, support playbook, reusable deployment patterns |
 
-## Discovery pack
+Decision records: [AI gathers, people decide](docs/decisions/0001-ai-gathers-humans-decide.md) · [sign-in](docs/decisions/0002-sign-in.md) · [AI extraction design](docs/decisions/0003-ai-extraction.md) · [summary and review](docs/decisions/0004-summary-and-review.md) · [backlog access](docs/decisions/0005-backlog-access.md). Also: [where AI is and isn't allowed](docs/ai-use.md), [architecture and trust boundaries](docs/architecture.md).
 
-Start here: [`docs/discovery`](docs/discovery/README.md). It covers:
-- the problem, and the current and future process
-- stakeholders and who decides what
-- numbered requirements and acceptance scenarios
-- scope and non-goals
-- a primer on FHIR, Da Vinci, X12, NCPDP, C-CDA and CMS-0057-F
-- a plan for the first client workshop
+## Run it
 
-The first design decision is already written down: [the AI gathers and drafts, people decide](docs/decisions/0001-ai-gathers-humans-decide.md).
+```bash
+docker compose up --build                 # workflow, extraction worker (rules), web app, PostgreSQL
+docker compose run --rm connectors        # send the ten synthetic fixtures through the connectors
+```
+
+Open http://127.0.0.1:3000 and sign in as `ivy` (intake), `nina` or `omar` (nurses), `dr.lee` (medical director) or `admin`. The local password is `demo-password`.
+
+**To extract with Claude instead of the rules baseline:** `EXTRACTOR=claude ANTHROPIC_API_KEY=... docker compose up`.
+
+**Without Docker** (Python 3.12, Node 24+, PostgreSQL 14+):
+1. Run the workflow service: `uvicorn app.main:app` in `workflow/`, with `DATABASE_URL` set.
+2. Run the web app: `npm run dev` in `web/`.
+3. Run the connectors: `node src/cli.ts ingest fixtures` in `connectors/`, with `CONNECTOR_TOKEN` set.
+
+## How it's checked
+
+| Check | What | Result |
+|---|---|---|
+| Workflow tests | 162, against real PostgreSQL: intake, duplicates (including a real race), clocks, permissions over HTTP, extraction checks, review, reports | ✅ locally |
+| Connector tests | 30: four adapters, plus failure injection against a misbehaving HTTP server | ✅ locally |
+| Browser tests | 2 Playwright journeys: intake → nurse → medical director, and a refusal the page doesn't offer | ✅ locally (Edge) |
+| Extraction test set | 40 labelled synthetic notes with traps. Rules baseline: 110 / 145 correct (75.9%), 10 false fills. **Claude: not run yet** (no API key) | [eval](workflow/eval/README.md) |
+| Simulated pilot | 200 requests through the running service: median 6 s from intake to the nurse queue; reviewers corrected 18% of the rules baseline's verified facts | [write-up](docs/delivery/pilot-simulation.md) |
+| CI: compose and Kubernetes | Every fixture through the real connectors, smoke test with the real worker, an AI-outage drill, a bad release rolled back under load, a database-outage drill | Runs on every push once the repo is on GitHub |
+| Peer review | One real person, timed with and without the facts | **Not done yet** ([protocol](docs/delivery/peer-review.md)) |
+
+## What it doesn't do
+
+- **No coverage decisions in software.** People approve, escalate and deny.
+- **No real data, and no claim of HIPAA compliance or FHIR / Da Vinci / X12 conformance.** The adapters map the fields the workflow needs.
+- **No appeals workflow, pharmacy prior authorization (NCPDP), or C-CDA parsing.** They're on the [roadmap](docs/delivery/roadmap.md) or out of scope.
+- **No single sign-on.** Passwords for the demo; an identity provider for real ([decision 0002](docs/decisions/0002-sign-in.md)).
+- **No migrations.** Tables are created at startup.
 
 ## Build log
 
@@ -358,6 +391,27 @@ AS-08 (a made-up quote is dropped) and AS-09 (AI failure or silence goes to manu
 **What this says:** the software side is fast enough. The rules baseline doesn't save reviewer work, because one in five of its "verified" facts is a misread real sentence. Whether Claude does better is the open question, and the test set is ready to answer it once there's an API key.
 
 **Not done:** timing a real person reviewing with and without the facts. The [peer-review protocol](docs/delivery/peer-review.md) is written, and it says plainly that it hasn't happened yet.
+
+### Step 15: business case and demo
+
+**Built:**
+- **A [business case](docs/delivery/business-case.md)** backed by an [ROI calculator](docs/delivery/roi.py) that keeps every assumption in one file and runs a self-test.
+- **A [roadmap](docs/delivery/roadmap.md)** with an exit test for each phase.
+- **[Decision record 0005](docs/decisions/0005-backlog-access.md):** the operations-vs-IT compromise. Wider queue access only during a declared backlog, time-boxed and logged. Agreed design, not built yet.
+- **A [product-feedback log](docs/delivery/product-feedback.md)** written the way field feedback should reach a product team.
+- **A [UAT script](docs/delivery/uat-script.md)** for client staff.
+- **A [traceability table](docs/delivery/traceability.md)** from every acceptance scenario to its tests.
+- **An [architecture page](docs/architecture.md)** with trust boundaries.
+- **A [three-minute demo script](docs/delivery/demo-script.md).**
+
+**What broke:** my own hypotheses. With the first volume guess (1,900 requests a week), re-keying and chasing documents alone would have needed more hours than six coordinators have. A business case built on that would be dismissed in the first meeting. The calculator now checks today's workload against the team's hours and refuses hypotheses that don't fit. The volume is now 1,000 a week, and that work takes 88% of the coordinators' time.
+
+**What it says:** the measurable value comes mostly from the parts that don't need AI: no re-keying, asking for documents once, a deadline-sorted queue. The pilot pays back in every scenario on those alone (4 to 10 months, all hypotheses). The AI changes only the nurse line, and its size is unknown until Claude is measured on the test set. The AI is upside to be proven, not the foundation of the case.
+
+**Still to do, and not something I can do for myself:**
+- run the Claude evaluation (needs an API key)
+- the peer review with a real person
+- record the demo in my own voice
 
 ## License
 

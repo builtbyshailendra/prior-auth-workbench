@@ -40,10 +40,26 @@ OPEN_STATES = ("received", "pended", "ready_for_review", "in_nurse_review", "esc
 PRIORITIES = ("standard", "expedited")
 SOURCES = ("fhir", "x12", "fax", "crm", "api")
 EXTRACTION_STATUSES = ("not_started", "complete", "manual_needed", "not_applicable")
+ROLES = ("intake_coordinator", "nurse_reviewer", "medical_director", "admin")
 
 
 def _one_of(column: str, values: tuple[str, ...]) -> str:
     return f"{column} IN ({', '.join(repr(v) for v in values)})"
+
+
+class User(Base):
+    """A person who signs in. Services use API tokens instead (see app/auth.py)."""
+
+    __tablename__ = "users"
+    __table_args__ = (CheckConstraint(_one_of("role", ROLES), name="role_is_known"),)
+
+    username: Mapped[str] = mapped_column(String(40), primary_key=True)
+    display_name: Mapped[str] = mapped_column(String(80))
+    role: Mapped[str] = mapped_column(String(30))
+    password_hash: Mapped[str] = mapped_column(String(200))
+    active: Mapped[bool] = mapped_column(default=True)
+    failed_logins: Mapped[int] = mapped_column(Integer, default=0)
+    locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class Member(Base):

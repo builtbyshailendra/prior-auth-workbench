@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app import audit
@@ -51,12 +52,29 @@ ACTIONS = {
                        "withdrawn", "Only an intake coordinator can withdraw a request."),
 }
 
-# Which cases each role sees (FR-15). Admins manage users, not cases.
-VISIBLE_STATES = {
-    "intake_coordinator": {"received", "pended", "ready_for_review", "closed_no_auth", "closed_ineligible", "withdrawn"},
-    "nurse_reviewer": {"ready_for_review", "in_nurse_review", "escalated", "approved", "denied"},
-    "medical_director": {"escalated", "approved", "denied"},
-}
+# Which cases each person sees (FR-15). Admins manage users, not cases.
+INTAKE_STATES = ("received", "pended", "ready_for_review", "closed_no_auth", "closed_ineligible", "withdrawn")
+
+
+def visible_to(role: str, username: str):
+    """A SQL condition for the cases this person may see, or None for none at all."""
+    if role == "intake_coordinator":
+        return Case.state.in_(INTAKE_STATES)
+    if role == "nurse_reviewer":
+        return or_(Case.state == "ready_for_review", Case.assigned_to == username)
+    if role == "medical_director":
+        return or_(Case.state == "escalated", Case.decided_by == username)
+    return None
+
+
+def can_view(case: Case, role: str, username: str) -> bool:
+    if role == "intake_coordinator":
+        return case.state in INTAKE_STATES
+    if role == "nurse_reviewer":
+        return case.state == "ready_for_review" or case.assigned_to == username
+    if role == "medical_director":
+        return case.state == "escalated" or case.decided_by == username
+    return False
 
 
 class NotAllowed(Exception):
@@ -69,10 +87,6 @@ class WrongState(Exception):
 
 class Invalid(Exception):
     """Something required is missing, like a denial reason (HTTP 422)."""
-
-
-def can_view(case: Case, role: str) -> bool:
-    return case.state in VISIBLE_STATES.get(role, set())
 
 
 def take(

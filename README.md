@@ -1,6 +1,6 @@
 # prior-auth-workbench
 
-![Status](https://img.shields.io/badge/status-step%203%20of%2015-orange)
+![Status](https://img.shields.io/badge/status-step%204%20of%2015-orange)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 **A prior-authorization request arrives from any of four source systems, gets checked against the health plan's documentation rules, has its key facts pulled out of the clinical notes with quotes as proof, and lands in a queue where people decide, on the clock CMS sets.**
@@ -116,6 +116,25 @@ Acceptance scenarios AS-01 to AS-07, AS-10 to AS-12 are now tests. 90 tests in a
 - **The clock keeps running while a case waits for documents.** Whether a request for information may pause it depends on the plan's own policies, an open question in the discovery pack, so the safe default is a clock that never pauses.
 - **Coverage problems close the case,** never deny it. An ineligible member isn't a medical-necessity decision.
 - **A denial can't be saved without a reason code and an explanation.** That's checked in the API and again by a database constraint.
+
+### Step 4: sign-in and permissions
+
+**Built:**
+- **Sign-in for people:** scrypt password hashes, an 8-hour signed session cookie (HttpOnly, SameSite=Strict), a 15-minute lockout after five wrong passwords, and a custom header on every cookie request that changes something.
+- **API tokens for the two services.** The connectors may only send requests; the extraction worker may only write extraction results.
+- **Decision endpoints** for start review, approve, escalate, deny and withdraw, all running through the role-and-state table from Step 3.
+- **Queues per person,** and admin-only user management.
+
+AS-10 and AS-11 now also run over HTTP. 112 tests.
+
+**What broke:**
+- **Sessions expiring in tests.** The deadline tests move the clock forward 59 and 72 hours, and the nurse's session expired on the way. That's correct behaviour, so the test now signs in again after each jump.
+- **Slow tests.** Hashing five demo passwords before every test took the suite to 42 seconds. The users are now created once per run and reset between tests: 18 seconds.
+
+**Decisions:**
+- **No one-off sign-in for the real world.** For a real client, the password sign-in gets replaced by their identity provider, and the role checks stay as they are ([decision record 0002](docs/decisions/0002-sign-in.md)).
+- **"No such case" for cases you can't see.** A case someone isn't allowed to see answers the same as one that doesn't exist, so case numbers don't leak.
+- **Services can never decide.** Neither service role appears in any decision's allowed list. A test calls every decision endpoint with the extraction worker's token and expects 403 each time.
 
 ## License
 

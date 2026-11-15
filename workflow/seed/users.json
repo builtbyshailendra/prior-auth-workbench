@@ -1,0 +1,30 @@
+{
+ "note": "Demo staff for the fictional Tallowmere Health Plan. Passwords come from DEMO_PASSWORD at seed time.",
+ "users": [
+  {
+   "username": "ivy",
+   "display_name": "Ivy Marsh",
+   "role": "intake_coordinator"
+  },
+  {
+   "username": "nina",
+   "display_name": "Nina Patel",
+   "role": "nurse_reviewer"
+  },
+  {
+   "username": "omar",
+   "display_name": "Omar Haddad",
+   "role": "nurse_reviewer"
+  },
+  {
+   "username": "dr.lee",
+   "display_name": "Dr. Sam Lee",
+   "role": "medical_director"
+  },
+  {
+   "username": "admin",
+   "display_name": "Alex Admin",
+   "role": "admin"
+  }
+ ]
+}

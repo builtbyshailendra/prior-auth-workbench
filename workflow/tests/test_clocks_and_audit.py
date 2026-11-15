@@ -15,16 +15,17 @@ from tests.conftest import START
 from tests.helpers import payload
 
 
-def test_as03_an_expedited_request_runs_on_a_72_hour_clock(client):
-    case = client.post("/api/intake", json=payload(priority="expedited")).json()["case"]
-    assert case["hours_left"] == 72.0
+def test_as03_an_expedited_request_runs_on_a_72_hour_clock(connector, as_user):
+    case_id = connector.post("/api/intake", json=payload(priority="expedited")).json()["case_id"]
+    assert as_user("nina").get(f"/api/cases/{case_id}").json()["hours_left"] == 72.0
+    # Sessions last 8 hours, so the nurse signs in again after each jump in time.
     clock.set(START + timedelta(hours=59))
-    assert client.get(f"/api/cases/{case['id']}").json()["risk"] == "on_track"
+    assert as_user("nina").get(f"/api/cases/{case_id}").json()["risk"] == "on_track"
     clock.set(START + timedelta(hours=60))
-    at_risk = client.get(f"/api/cases/{case['id']}").json()
+    at_risk = as_user("nina").get(f"/api/cases/{case_id}").json()
     assert (at_risk["risk"], at_risk["hours_left"]) == ("at_risk", 12.0)
     clock.set(START + timedelta(hours=72))
-    assert client.get(f"/api/cases/{case['id']}").json()["risk"] == "overdue"
+    assert as_user("nina").get(f"/api/cases/{case_id}").json()["risk"] == "overdue"
 
 
 def test_standard_requests_turn_at_risk_on_their_last_day():
@@ -33,14 +34,15 @@ def test_standard_requests_turn_at_risk_on_their_last_day():
     assert risk("standard", due, START + timedelta(days=5, hours=23)) == "on_track"
 
 
-def test_a_pended_case_keeps_its_clock_running(client):
-    case = client.post("/api/intake", json=payload(documents=[])).json()["case"]
+def test_a_pended_case_keeps_its_clock_running(connector, as_user):
+    case_id = connector.post("/api/intake", json=payload(documents=[])).json()["case_id"]
     clock.set(START + timedelta(days=6, hours=1))
-    assert client.get(f"/api/cases/{case['id']}").json()["risk"] == "at_risk"
+    assert as_user("ivy").get(f"/api/cases/{case_id}").json()["risk"] == "at_risk"
 
 
-def test_closed_cases_have_no_risk(client):
-    case = client.post("/api/intake", json=payload(service_code="99213", documents=[])).json()["case"]
+def test_closed_cases_have_no_risk(connector, as_user):
+    case_id = connector.post("/api/intake", json=payload(service_code="99213", documents=[])).json()["case_id"]
+    case = as_user("ivy").get(f"/api/cases/{case_id}").json()
     assert (case["risk"], case["hours_left"]) == ("closed", None)
 
 

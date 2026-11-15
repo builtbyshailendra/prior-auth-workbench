@@ -1,6 +1,6 @@
 # prior-auth-workbench
 
-![Status](https://img.shields.io/badge/status-step%202%20of%2015-orange)
+![Status](https://img.shields.io/badge/status-step%203%20of%2015-orange)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 **A prior-authorization request arrives from any of four source systems, gets checked against the health plan's documentation rules, has its key facts pulled out of the clinical notes with quotes as proof, and lands in a queue where people decide, on the clock CMS sets.**
@@ -96,6 +96,26 @@ The workflow here uses the same split, without claiming conformance.
 **Decision:** the rules are data, not code. The people who own them (clinical policy) change a reviewed file, and each case will record the catalogue version it was checked against. A malformed catalogue stops the service at startup instead of failing halfway through a request.
 
 **Learned:** an NPI's last digit is a Luhn check digit computed with a fixed `80840` prefix, which works out to adding 24 before the usual Luhn sum. CMS's worked example (`123456789` → check digit `3`) is now a test.
+
+### Step 3: case lifecycle, audit trail and deadline clocks
+
+**Built:** the workflow service (FastAPI + PostgreSQL):
+- Intake takes one request in the internal format and routes it: closed when the member isn't covered on the service date, closed when the service needs no authorization, pended with one request listing every missing document, or ready for review.
+- New documents re-run the checks.
+- Each case gets a 72-hour or 7-day clock from receipt, and the queue is sorted by deadline.
+- A role-and-state table says who may start a review, approve, escalate, deny or withdraw.
+- Every change goes into an audit trail the database won't let anyone edit, carrying the caller's trace ID and no note text.
+
+Acceptance scenarios AS-01 to AS-07, AS-10 to AS-12 are now tests. 90 tests in all.
+
+**What broke:**
+- **The race test was fake.** My first test for "two channels send the same request at the same moment" passed even with the lock removed. Each thread opened its database connection after the start signal, so they ran one after another. Now each thread connects first. Without the lock, the database's own rule (one open case per member, provider, service and date) rejects the second insert with a unique-key error. With the lock, all four arrive together and exactly one case opens, every time.
+- **Loading the synthetic members failed** on a foreign key: SQLAlchemy saved coverage rows before the members they point to, because no relationship links the two models. The members are now saved first.
+
+**Decisions:**
+- **The clock keeps running while a case waits for documents.** Whether a request for information may pause it depends on the plan's own policies, an open question in the discovery pack, so the safe default is a clock that never pauses.
+- **Coverage problems close the case,** never deny it. An ineligible member isn't a medical-necessity decision.
+- **A denial can't be saved without a reason code and an explanation.** That's checked in the API and again by a database constraint.
 
 ## License
 

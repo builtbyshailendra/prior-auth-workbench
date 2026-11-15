@@ -1,0 +1,735 @@
+{
+ "note": "Synthetic members for the fictional Tallowmere Health Plan's core admin system. Not real people.",
+ "members": [
+  {
+   "id": "SYN-M0001",
+   "name": "Sawyer Okonkwo",
+   "birth_date": "1974-12-25",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0002",
+   "name": "Marlow Adeyemi",
+   "birth_date": "1966-03-23",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0003",
+   "name": "Parker Castellano",
+   "birth_date": "2002-12-04",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0004",
+   "name": "Jordan Whitfield",
+   "birth_date": "1977-11-06",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0005",
+   "name": "Casey Ferreira",
+   "birth_date": "1978-08-06",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0006",
+   "name": "Tatum Mbeki",
+   "birth_date": "1965-03-12",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0007",
+   "name": "Parker Duquesne",
+   "birth_date": "2004-11-06",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2025-01-01",
+     "end": "2026-10-31"
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0008",
+   "name": "Blair Lindqvist",
+   "birth_date": "1983-07-01",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0009",
+   "name": "Dakota Fairweather",
+   "birth_date": "1963-06-20",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0010",
+   "name": "Dakota Ramaswamy",
+   "birth_date": "2004-06-03",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0011",
+   "name": "Rowan Nakamura",
+   "birth_date": "1946-07-21",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0012",
+   "name": "Morgan Vasquez",
+   "birth_date": "1984-08-12",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2024-01-01",
+     "end": "2026-06-30"
+    },
+    {
+     "plan": "Medicaid managed care",
+     "start": "2027-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0013",
+   "name": "Blair Nakamura",
+   "birth_date": "1959-02-04",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0014",
+   "name": "Sawyer Moreau",
+   "birth_date": "1960-10-12",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0015",
+   "name": "Avery Okonkwo",
+   "birth_date": "1960-03-10",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0016",
+   "name": "Sawyer Brennan",
+   "birth_date": "1981-11-23",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0017",
+   "name": "Casey Mbeki",
+   "birth_date": "1953-11-26",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0018",
+   "name": "Blair Fairweather",
+   "birth_date": "1954-06-17",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0019",
+   "name": "Dakota Nakamura",
+   "birth_date": "1976-08-12",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2025-01-01",
+     "end": "2026-10-31"
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0020",
+   "name": "Marlow Halvorsen",
+   "birth_date": "1978-10-04",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0021",
+   "name": "Ellis Ramaswamy",
+   "birth_date": "1982-02-27",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0022",
+   "name": "Jordan Thornbury",
+   "birth_date": "1972-03-05",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0023",
+   "name": "Rowan Castellano",
+   "birth_date": "1979-05-25",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0024",
+   "name": "Hayden Okonkwo",
+   "birth_date": "1971-02-09",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0025",
+   "name": "Rowan Ramaswamy",
+   "birth_date": "1945-12-22",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0026",
+   "name": "Morgan Fairweather",
+   "birth_date": "1948-09-07",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0027",
+   "name": "Marlow Whitfield",
+   "birth_date": "1982-01-09",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0028",
+   "name": "Casey Thornbury",
+   "birth_date": "1972-06-14",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0029",
+   "name": "Morgan Adeyemi",
+   "birth_date": "1969-10-16",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0030",
+   "name": "Avery Mbeki",
+   "birth_date": "1959-02-24",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0031",
+   "name": "Avery Ashdown",
+   "birth_date": "1951-08-12",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0032",
+   "name": "Emerson Fairweather",
+   "birth_date": "1985-10-12",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0033",
+   "name": "Skyler Okonkwo",
+   "birth_date": "1991-10-08",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2025-01-01",
+     "end": "2026-10-31"
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0034",
+   "name": "Hayden Petrov",
+   "birth_date": "1993-01-16",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0035",
+   "name": "Reese Nakamura",
+   "birth_date": "1972-05-22",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0036",
+   "name": "Rowan Lindqvist",
+   "birth_date": "1959-04-09",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0037",
+   "name": "Riley Petrov",
+   "birth_date": "1988-06-27",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0038",
+   "name": "Sawyer Adeyemi",
+   "birth_date": "1997-03-03",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0039",
+   "name": "Dakota Adeyemi",
+   "birth_date": "1962-02-16",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0040",
+   "name": "Rowan Kowalczyk",
+   "birth_date": "1987-01-18",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0041",
+   "name": "Parker Thornbury",
+   "birth_date": "2003-08-24",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2024-01-01",
+     "end": "2026-06-30"
+    },
+    {
+     "plan": "Medicare Advantage",
+     "start": "2027-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0042",
+   "name": "Ellis Brennan",
+   "birth_date": "2002-09-27",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0043",
+   "name": "Quinn Moreau",
+   "birth_date": "1965-08-19",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0044",
+   "name": "Reese Lindqvist",
+   "birth_date": "1990-01-19",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0045",
+   "name": "Reese Moreau",
+   "birth_date": "1958-03-12",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0046",
+   "name": "Parker Halvorsen",
+   "birth_date": "1963-02-02",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0047",
+   "name": "Emerson Fairweather",
+   "birth_date": "1976-12-18",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0048",
+   "name": "Parker Ferreira",
+   "birth_date": "1972-06-23",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2025-01-01",
+     "end": "2026-10-31"
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0049",
+   "name": "Riley Ashdown",
+   "birth_date": "1962-04-17",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0050",
+   "name": "Quinn Ferreira",
+   "birth_date": "1969-12-12",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0051",
+   "name": "Jordan Ferreira",
+   "birth_date": "1959-03-12",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0052",
+   "name": "Jordan Whitfield",
+   "birth_date": "2000-04-24",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0053",
+   "name": "Marlow Mbeki",
+   "birth_date": "2001-01-24",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0054",
+   "name": "Casey Castellano",
+   "birth_date": "1953-08-15",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0055",
+   "name": "Blair Nakamura",
+   "birth_date": "1957-10-10",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0056",
+   "name": "Rowan Nakamura",
+   "birth_date": "1950-09-09",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0057",
+   "name": "Finley Ramaswamy",
+   "birth_date": "1953-06-25",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0058",
+   "name": "Dakota Kowalczyk",
+   "birth_date": "1956-09-23",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0059",
+   "name": "Reese Nakamura",
+   "birth_date": "1952-04-15",
+   "coverage": [
+    {
+     "plan": "Medicare Advantage",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": "SYN-M0060",
+   "name": "Hayden Iyer",
+   "birth_date": "2002-11-26",
+   "coverage": [
+    {
+     "plan": "Medicaid managed care",
+     "start": "2026-01-01",
+     "end": null
+    }
+   ]
+  }
+ ]
+}

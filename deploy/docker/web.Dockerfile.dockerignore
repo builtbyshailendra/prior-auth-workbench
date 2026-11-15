@@ -1,0 +1,10 @@
+node_modules
+.next
+test-results
+playwright-report
+blob-report
+*.tsbuildinfo
+next-env.d.ts
+AGENTS.md
+e2e
+.env*

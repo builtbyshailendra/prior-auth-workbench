@@ -1,0 +1,103 @@
+# The whole system on one machine:
+#   docker compose up --build                     # workflow, extraction worker, web, database
+#   docker compose run --rm connectors            # send the synthetic fixtures through the connectors
+# Then open http://127.0.0.1:3000 and sign in as nina (password: demo-password, local only).
+#
+# The worker uses the rules baseline unless you pass EXTRACTOR=claude and ANTHROPIC_API_KEY.
+# Tokens and the demo password below are local defaults; override them in a .env file.
+name: priorauth
+
+x-tokens: &tokens
+  CONNECTOR_TOKEN: ${CONNECTOR_TOKEN:-local-connector-token-0123456789}
+  EXTRACTOR_TOKEN: ${EXTRACTOR_TOKEN:-local-extractor-token-0123456789}
+
+services:
+  postgres:
+    image: postgres:16.16-alpine
+    environment:
+      POSTGRES_DB: priorauth
+      # Local only: trust auth keeps a password out of this file, and the database port
+      # isn't published. The Kubernetes setup uses a generated password.
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # Over TCP, not the socket: while initialising, the image runs a temporary server on the socket only.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d priorauth"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  workflow:
+    build:
+      context: workflow
+      dockerfile: ../deploy/docker/workflow.Dockerfile
+    # CI builds the images once and passes their names in, so compose and Kubernetes run the same images.
+    image: ${WORKFLOW_IMAGE:-priorauth-workflow:local}
+    restart: unless-stopped
+    environment:
+      <<: *tokens
+      DATABASE_URL: postgresql+psycopg://postgres@postgres:5432/priorauth
+      APP_ENV: dev
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-demo-password}
+      SESSION_SECRET: ${SESSION_SECRET:-local-session-secret-not-for-production-0001}
+      EXTRACTION_MODE: worker
+      EXTRACTION_TIMEOUT_MINUTES: ${EXTRACTION_TIMEOUT_MINUTES:-10}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8000/api/ready', timeout=2)"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  worker:
+    image: ${WORKFLOW_IMAGE:-priorauth-workflow:local}
+    command: ["python", "-m", "app.worker"]
+    restart: unless-stopped
+    environment:
+      EXTRACTOR_TOKEN: ${EXTRACTOR_TOKEN:-local-extractor-token-0123456789}
+      WORKFLOW_URL: http://workflow:8000
+      EXTRACTOR: ${EXTRACTOR:-rules}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      POLL_SECONDS: "2"
+    depends_on:
+      workflow:
+        condition: service_healthy
+
+  web:
+    build:
+      context: web
+      dockerfile: ../deploy/docker/web.Dockerfile
+    image: ${WEB_IMAGE:-priorauth-web:local}
+    restart: unless-stopped
+    depends_on:
+      workflow:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/login').then(r => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "127.0.0.1:3000:3000"
+
+  connectors:
+    build:
+      context: connectors
+      dockerfile: ../deploy/docker/connectors.Dockerfile
+    image: ${CONNECTORS_IMAGE:-priorauth-connectors:local}
+    # A one-off job, not a long-running service: start it with "docker compose run".
+    profiles: ["tools"]
+    environment:
+      CONNECTOR_TOKEN: ${CONNECTOR_TOKEN:-local-connector-token-0123456789}
+      WORKFLOW_URL: http://workflow:8000
+    depends_on:
+      workflow:
+        condition: service_healthy
+
+volumes:
+  pgdata:

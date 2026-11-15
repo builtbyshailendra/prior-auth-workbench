@@ -29,7 +29,7 @@ from app.auth import (
     sign_in,
 )
 from app.db import SessionLocal, create_schema, get_session
-from app import review
+from app import observability, review
 from app.extraction import service as extraction
 from app.intake import CaseClosed, IntakeRejected, add_documents, open_rfi, receive
 from app.lifecycle import REASON_CODES, Invalid, NotAllowed, WrongState, can_view, take, visible_to
@@ -40,6 +40,9 @@ from app.views import case_detail, case_summary
 
 CATALOGUE = catalogue_module.load()
 DEV = os.environ.get("APP_ENV", "dev") == "dev"
+# Secure cookies are only sent over HTTPS. On by default outside development; a cluster
+# reached over plain HTTP on 127.0.0.1 (the kind demo) turns it off explicitly.
+COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "0" if DEV else "1") == "1"
 log = logging.getLogger("workflow")
 
 
@@ -58,13 +61,21 @@ async def sweep_forever() -> None:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    if os.environ.get("LOG_FORMAT") == "json":
+        logging.basicConfig(level=logging.INFO, format="%(message)s")
     create_schema()
     if os.environ.get("SEED_DEMO_DATA", "1") == "1":
         with SessionLocal() as session:
-            load_members(session)
-            password = os.environ.get("DEMO_PASSWORD") or ("demo-password" if DEV else "")
-            if password:
-                load_users(session, password)
+            # Several copies can start at once; the session-level lock makes them seed one at a time.
+            session.execute(text("SELECT pg_advisory_lock(72003)"))
+            try:
+                load_members(session)
+                password = os.environ.get("DEMO_PASSWORD") or ("demo-password" if DEV else "")
+                if password:
+                    load_users(session, password)
+            finally:
+                session.execute(text("SELECT pg_advisory_unlock(72003)"))
+                session.commit()
     sweeper = asyncio.create_task(sweep_forever()) if extraction.mode() == "worker" else None
     yield
     if sweeper:
@@ -72,6 +83,7 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="prior-auth-workbench workflow", lifespan=lifespan)
+app.add_api_route("/metrics", observability.endpoint, include_in_schema=False)
 
 
 @app.middleware("http")
@@ -82,6 +94,9 @@ async def trace_ids(request: Request, call_next):
     response = await call_next(request)
     response.headers["X-Trace-Id"] = request.state.trace_id
     return response
+
+
+app.middleware("http")(observability.record)
 
 
 # --- health ------------------------------------------------------------------------
@@ -119,7 +134,7 @@ def login(payload: SignIn, response: Response, session: Session = Depends(get_se
     except SignInFailed as failed:
         return JSONResponse({"detail": str(failed)}, status_code=failed.status)
     response.set_cookie(COOKIE, make_session_token(user.username), max_age=int(SESSION_LENGTH.total_seconds()),
-                        httponly=True, samesite="strict", secure=not DEV, path="/")
+                        httponly=True, samesite="strict", secure=COOKIE_SECURE, path="/")
     return me_view(user)
 
 

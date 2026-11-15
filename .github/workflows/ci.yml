@@ -1,0 +1,183 @@
+name: ci
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY: ghcr.io/${{ github.repository_owner }}
+
+jobs:
+  workflow:
+    # Python service tests against a real PostgreSQL: some rules live in the database.
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: priorauth_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://postgres@127.0.0.1:5432/priorauth_test
+    defaults:
+      run:
+        working-directory: workflow
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - run: pytest -q
+      - name: score the rules baseline on the labelled test set
+        run: python -m eval.run --provider rules
+
+  connectors:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: connectors
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "26"
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  web:
+    # The reviewer screen in a real browser, against the real workflow service.
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: priorauth_e2e
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://postgres@127.0.0.1:5432/priorauth_e2e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r workflow/requirements.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "26"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: install and type-check
+        working-directory: web
+        run: |
+          npm ci
+          npm run typecheck
+      - name: install Chromium for Playwright
+        working-directory: web
+        run: npx playwright install --with-deps chromium
+      - name: browser tests
+        working-directory: web
+        run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: web/playwright-report/
+
+  images:
+    # Build each image once, run the whole system from them in compose: the real
+    # connectors, the real extraction worker, the web app. Push to GHCR from main.
+    needs: [workflow, connectors, web]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      tag: ${{ steps.names.outputs.tag }}
+    env:
+      # Short, so the AI-outage drill below finishes in about a minute.
+      EXTRACTION_TIMEOUT_MINUTES: "0.5"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: name the images after this commit
+        id: names
+        run: |
+          tag=$(git rev-parse --short=7 HEAD)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          {
+            echo "WORKFLOW_IMAGE=$REGISTRY/priorauth-workflow:$tag"
+            echo "WEB_IMAGE=$REGISTRY/priorauth-web:$tag"
+            echo "CONNECTORS_IMAGE=$REGISTRY/priorauth-connectors:$tag"
+          } >> "$GITHUB_ENV"
+
+      - name: lint the Dockerfiles
+        run: |
+          docker build --check -f deploy/docker/workflow.Dockerfile workflow
+          docker build --check -f deploy/docker/web.Dockerfile web
+          docker build --check -f deploy/docker/connectors.Dockerfile connectors
+
+      - name: build the images
+        run: |
+          labels=(--label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY"
+                  --label "org.opencontainers.image.revision=$GITHUB_SHA")
+          docker build "${labels[@]}" -f deploy/docker/workflow.Dockerfile -t "$WORKFLOW_IMAGE" workflow
+          docker build "${labels[@]}" -f deploy/docker/web.Dockerfile -t "$WEB_IMAGE" web
+          docker build "${labels[@]}" -f deploy/docker/connectors.Dockerfile -t "$CONNECTORS_IMAGE" connectors
+          docker image ls --filter "reference=$REGISTRY/*"
+
+      - name: start the system from those images
+        run: docker compose up --no-build --wait --wait-timeout 180
+
+      - name: send every fixture through the connectors
+        run: |
+          docker compose run --rm --no-deps connectors 2>&1 | tee ingest.log
+          # 10 fixtures: 9 delivered (created, linked or closed), 1 refused for a bad NPI.
+          grep -q 'Done: {"delivered":9,"rejected":1}' ingest.log
+
+      - name: smoke test through the web app, with the extraction worker running
+        env:
+          CONNECTOR_TOKEN: local-connector-token-0123456789
+        run: python3 deploy/scripts/smoke.py http://127.0.0.1:3000
+
+      - name: AI outage drill - with the worker stopped, cases still reach a person
+        env:
+          CONNECTOR_TOKEN: local-connector-token-0123456789
+          EXPECT_EXTRACTION: manual_needed
+          WAIT: "150"
+        run: |
+          docker compose stop worker
+          python3 deploy/scripts/smoke.py http://127.0.0.1:3000
+          docker compose start worker
+
+      - name: show the logs
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: save the images for the Kubernetes job
+        run: docker save "$WORKFLOW_IMAGE" "$WEB_IMAGE" | gzip -1 > images.tar.gz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: images
+          path: images.tar.gz
+          retention-days: 1
+
+      - name: push to GitHub Container Registry
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker push "$WORKFLOW_IMAGE"
+          docker push "$WEB_IMAGE"
+          docker push "$CONNECTORS_IMAGE"

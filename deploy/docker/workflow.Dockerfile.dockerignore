@@ -1,0 +1,8 @@
+# Only requirements.txt, app/, rules/ and seed/ are copied; this keeps the context small.
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.venv
+tests
+eval
+.env*

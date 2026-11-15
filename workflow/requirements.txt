@@ -4,3 +4,4 @@ SQLAlchemy==2.1.8
 psycopg[binary]==3.3.5
 PyYAML==6.0.3
 anthropic==2.8.0
+prometheus-client==0.26.0

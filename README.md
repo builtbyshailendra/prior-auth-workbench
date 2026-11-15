@@ -1,6 +1,6 @@
 # prior-auth-workbench
 
-![Status](https://img.shields.io/badge/status-step%2011%20of%2015-orange)
+![Status](https://img.shields.io/badge/status-step%2012%20of%2015-orange)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 **A prior-authorization request arrives from any of four source systems, gets checked against the health plan's documentation rules, has its key facts pulled out of the clinical notes with quotes as proof, and lands in a queue where people decide, on the clock CMS sets.**
@@ -40,7 +40,7 @@ flowchart LR
 | B. Core workflow | 2. Rules and validation · 3. Case lifecycle, audit, clocks · 4. Sign-in and permissions · 5. Reviewer screen | ✅ Done |
 | C. Integrations | 6. Connector service and FHIR · 7. X12 278, fax and CRM · 8. Reliability | ✅ Done |
 | D. Bounded AI | 9. Labelled test set · 10. Extraction with checked quotes · 11. Reviewer summary | ✅ Done |
-| E. Operate | 12. Containers and CI · 13. Deploy, rollback and outage drills | |
+| E. Operate | 12. Containers and CI · 13. Deploy, rollback and outage drills | In progress |
 | F. Outcome | 14. Measure · 15. Business case and demo | |
 
 ## Discovery pack
@@ -294,6 +294,32 @@ AS-08 (a made-up quote is dropped) and AS-09 (AI failure or silence goes to manu
 **Decision** ([decision record 0004](docs/decisions/0004-summary-and-review.md)): the summary is built by template from the checked facts, not written by the model. The facts are already structured, so a model rewriting them would add the exact risk this design exists to prevent (a sentence the facts don't support) without adding information.
 
 **What broke:** nothing new. Two older tests had to learn that the history now ends with "summary drafted".
+
+### Step 12: containers, logs, metrics and CI
+
+**Built:**
+- **Container images** for the workflow service (which is also the extraction worker, with a different command), the web app (Next.js standalone) and the connectors. Pinned bases, numeric non-root users.
+- **`compose.yaml`:** the whole system with one command, with the connectors as a one-off job.
+- **JSON request logs** with the trace ID, and never patient details.
+- **A Prometheus `/metrics` endpoint:**
+  - requests by route pattern
+  - live counts of cases by state and deadline risk
+  - extraction outcomes
+  - facts by source
+  - summary reviews
+- **Demo seeding behind an advisory lock,** because two copies starting together would otherwise race on the demo users, the same lesson as the schema race in serviceops-workbench.
+- **CI on every push:**
+  - the workflow tests on PostgreSQL
+  - the rules baseline score
+  - connector tests and type-check
+  - the browser tests
+  - then the images job, which builds every image and runs the system from them
+- **What the images job checks:**
+  - all 10 fixtures go through the real connectors (expecting 9 delivered, 1 refused)
+  - a smoke test where the real extraction worker fills in verified facts
+  - an **AI outage drill**: with the worker stopped, a new case must still reach a nurse, with facts marked for manual entry
+
+**Checked locally:** actionlint, shellcheck, `docker compose config` and 158 workflow tests. Docker can't run on my machine, so everything that needs containers runs in GitHub Actions. The first results go in the next entry.
 
 ## License
 

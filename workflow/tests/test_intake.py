@@ -29,6 +29,7 @@ def test_as01_complete_standard_request_becomes_ready_for_review(connector, as_u
     assert [(e["event"], e["to"]) for e in case["history"]] == [
         ("received", "received"),
         ("ready_for_review", "ready_for_review"),
+        ("summary_drafted", None),
     ]
     assert {e["trace_id"] for e in case["history"]} == {"trace-as01"}
 
@@ -53,7 +54,7 @@ def test_as02_missing_documents_are_asked_for_all_at_once(connector, as_user):
     assert case["missing"] == []
     assert case["rfis"][0]["resolved_at"] is not None
     assert [e["event"] for e in case["history"]] == [
-        "received", "pended", "documents_received", "rechecked", "ready_for_review",
+        "received", "pended", "documents_received", "rechecked", "ready_for_review", "summary_drafted",
     ]
 
 

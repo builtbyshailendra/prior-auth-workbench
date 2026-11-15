@@ -238,6 +238,28 @@ class ExtractionRun(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class Summary(Base):
+    """A drafted reviewer summary. Each sentence lists the fact IDs it came from."""
+
+    __tablename__ = "summaries"
+    __table_args__ = (
+        CheckConstraint("review_status IN ('pending', 'accepted', 'edited')", name="summary_review_status_is_known"),
+        CheckConstraint("review_status <> 'edited' OR edited_text IS NOT NULL", name="edited_summary_has_text"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    case_id: Mapped[int] = mapped_column(ForeignKey("cases.id"), index=True)
+    text: Mapped[str] = mapped_column(Text)
+    sentences: Mapped[list[dict]] = mapped_column(JSONB)
+    method: Mapped[str] = mapped_column(String(20))
+    review_status: Mapped[str] = mapped_column(String(10), default="pending")
+    edited_text: Mapped[str | None] = mapped_column(Text)
+    reviewed_by: Mapped[str | None] = mapped_column(String(40))
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    superseded: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class AuditEvent(Base):
     """Append-only history. A trigger (below) refuses UPDATE and DELETE."""
 

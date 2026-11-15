@@ -52,6 +52,7 @@ export type Summary = {
   method: string;
   review_status: "pending" | "accepted" | "edited";
   edited_text: string | null;
+  reviewed_by: string | null;
 };
 
 export type CaseDetail = CaseSummary & {
@@ -67,6 +68,7 @@ export type CaseDetail = CaseSummary & {
   submissions: { source: string; source_id: string }[];
   rfis: { items: { type: string; label: string }[]; created_at: string; resolved_at: string | null }[];
   history: { event: string; actor: string; role: string; from: State | null; to: State | null; trace_id: string; at: string }[];
+  checklist_fields?: { name: string; label: string; kind: "integer" | "boolean" }[];
   facts?: Fact[];
   extraction?: null | { provider: string; model: string; status: string; verified: number; dropped: number; cost_usd: number; duration_ms: number };
   summary?: Summary | null;

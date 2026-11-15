@@ -126,6 +126,18 @@ test("a request goes from intake to a medical director's decision", async ({ pag
     await page.getByRole("button", { name: "Pick up for review" }).click();
     await expect(page.getByTestId("case-state")).toHaveText("In nurse review");
     await expect(page.getByRole("button", { name: "Deny" })).toHaveCount(0); // nurses can't deny
+    // The nurse enters the fact the AI couldn't verify, then accepts the drafted summary.
+    const duration = page.getByTestId("fact-symptom_duration_weeks");
+    await duration.getByRole("button", { name: "Enter" }).click();
+    await duration.getByLabel("How long symptoms have lasted (weeks)").fill("10");
+    await duration.getByLabel("Where in the documents").fill("Clinic note, first sentence");
+    await duration.getByRole("button", { name: "Save fact" }).click();
+    await expect(duration).toContainText("Entered by nina");
+    const summary = page.getByTestId("summary");
+    await expect(summary).toContainText("How long symptoms have lasted (weeks): 10 weeks (entered by the reviewer).");
+    await summary.getByRole("button", { name: "Accept summary" }).click();
+    await expect(summary).toContainText("Accepted by nina");
+    await shot(page, "5-reviewer-summary");
     await page.getByLabel("Note (needed to escalate)").fill("Exam findings aren't documented; please review.");
     await page.getByRole("button", { name: "Escalate to medical director" }).click();
     await expect(page.getByTestId("case-state")).toHaveText("With medical director");

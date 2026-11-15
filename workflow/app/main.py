@@ -29,6 +29,7 @@ from app.auth import (
     sign_in,
 )
 from app.db import SessionLocal, create_schema, get_session
+from app import review
 from app.extraction import service as extraction
 from app.intake import CaseClosed, IntakeRejected, add_documents, open_rfi, receive
 from app.lifecycle import REASON_CODES, Invalid, NotAllowed, WrongState, can_view, take, visible_to
@@ -48,7 +49,7 @@ async def sweep_forever() -> None:
         await asyncio.sleep(30)
         try:
             with SessionLocal() as session:
-                moved = extraction.sweep(session)
+                moved = extraction.sweep(session, CATALOGUE)
             if moved:
                 log.warning("extraction sweep moved %s case(s) to manual entry", moved)
         except Exception:  # never let the sweep kill the service
@@ -257,6 +258,55 @@ def act(case_id: int, action: Literal["start_review", "approve", "escalate", "de
         raise HTTPException(422, str(invalid)) from None
     session.commit()
     return case_detail(session, case, CATALOGUE)
+
+
+# --- review: facts and summary --------------------------------------------------------------
+
+class FactEntry(BaseModel):
+    field: str = Field(max_length=40)
+    value: str | None = Field(default=None, max_length=40)
+    note: str = Field(default="", max_length=1000)
+
+
+class SummaryReview(BaseModel):
+    accepted: bool
+    edited_text: str | None = Field(default=None, max_length=4000)
+
+
+def _review_call(session: Session, case_id: int, principal: Principal, fn) -> dict:
+    case = session.get(Case, case_id, with_for_update=True)
+    if case is None or not can_view(case, principal.role, principal.username):
+        raise HTTPException(404, "No such case")
+    try:
+        fn(case)
+    except NotAllowed as refused:
+        session.rollback()
+        raise HTTPException(403, str(refused)) from None
+    except WrongState as wrong:
+        session.rollback()
+        raise HTTPException(409, str(wrong)) from None
+    except Invalid as invalid:
+        session.rollback()
+        raise HTTPException(422, str(invalid)) from None
+    session.commit()
+    return case_detail(session, case, CATALOGUE)
+
+
+@app.post("/api/review/{case_id}/facts")
+def post_fact(case_id: int, payload: FactEntry, request: Request, session: Session = Depends(get_session),
+              principal: Principal = Depends(require("nurse_reviewer", "medical_director"))) -> dict:
+    """Enter a missing fact or correct an extracted one. The original is kept, marked superseded."""
+    return _review_call(session, case_id, principal, lambda case: review.enter_fact(
+        session, case, field=payload.field, value=payload.value, note=payload.note, user=principal.username,
+        role=principal.role, trace_id=request.state.trace_id, catalogue=CATALOGUE))
+
+
+@app.post("/api/review/{case_id}/summary")
+def post_summary_review(case_id: int, payload: SummaryReview, request: Request, session: Session = Depends(get_session),
+                        principal: Principal = Depends(require("nurse_reviewer", "medical_director"))) -> dict:
+    return _review_call(session, case_id, principal, lambda case: review.review_summary(
+        session, case, accepted=payload.accepted, edited_text=payload.edited_text, user=principal.username,
+        role=principal.role, trace_id=request.state.trace_id))
 
 
 # --- extraction (the worker's two endpoints) -------------------------------------------

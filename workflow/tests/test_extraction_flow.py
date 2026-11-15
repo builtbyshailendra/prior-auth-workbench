@@ -11,6 +11,7 @@ import anthropic
 import httpx2
 import pytest
 
+from app import catalogue
 from app.clocks import clock
 from app.db import SessionLocal
 from app.extraction import service as extraction
@@ -110,10 +111,10 @@ def test_as09_if_the_worker_never_answers_the_sweep_gives_up_after_ten_minutes(w
     case_id = new_case(connector)
     clock.set(START + timedelta(minutes=9))
     with SessionLocal() as s:
-        assert extraction.sweep(s) == 0
+        assert extraction.sweep(s, catalogue.load()) == 0
     clock.set(START + timedelta(minutes=11))
     with SessionLocal() as s:
-        assert extraction.sweep(s) == 1
+        assert extraction.sweep(s, catalogue.load()) == 1
     case = as_user("nina").get(f"/api/cases/{case_id}").json()
     assert (case["state"], case["extraction_status"]) == ("ready_for_review", "manual_needed")
     assert case["extraction"]["status"] == "timed_out"

@@ -1,6 +1,6 @@
 # prior-auth-workbench
 
-![Status](https://img.shields.io/badge/status-step%2010%20of%2015-orange)
+![Status](https://img.shields.io/badge/status-step%2011%20of%2015-orange)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 **A prior-authorization request arrives from any of four source systems, gets checked against the health plan's documentation rules, has its key facts pulled out of the clinical notes with quotes as proof, and lands in a queue where people decide, on the clock CMS sets.**
@@ -39,7 +39,7 @@ flowchart LR
 | A. Discovery | 1. Discovery pack | ✅ Done |
 | B. Core workflow | 2. Rules and validation · 3. Case lifecycle, audit, clocks · 4. Sign-in and permissions · 5. Reviewer screen | ✅ Done |
 | C. Integrations | 6. Connector service and FHIR · 7. X12 278, fax and CRM · 8. Reliability | ✅ Done |
-| D. Bounded AI | 9. Labelled test set · 10. Extraction with checked quotes · 11. Reviewer summary | In progress |
+| D. Bounded AI | 9. Labelled test set · 10. Extraction with checked quotes · 11. Reviewer summary | ✅ Done |
 | E. Operate | 12. Containers and CI · 13. Deploy, rollback and outage drills | |
 | F. Outcome | 14. Measure · 15. Business case and demo | |
 
@@ -275,6 +275,25 @@ AS-08 (a made-up quote is dropped) and AS-09 (AI failure or silence goes to manu
 - **No citations feature.** Claude's citations can't be combined with structured output, so our own verifier checks the quotes.
 
 **Not done yet:** a live Claude run on the test set. This project has no API key, so the results table says "not run yet" rather than showing an estimate.
+
+### Step 11: reviewer summary, fact entry and correction
+
+![The nurse enters a fact and accepts the summary](docs/screenshots/5-reviewer-summary.png)
+
+**Built:**
+- **A summary for the decision,** drafted whenever a case reaches review: one sentence per checked fact, each carrying the ID of the fact it came from, plus a plain warning when answers couldn't be verified.
+- **The reviewer can:**
+  - enter a missing fact or correct an extracted one, saying where in the documents it comes from
+  - accept the summary or edit it
+
+  Every change is attributed and audited. The AI's original answer is kept, marked superseded, so corrections can be counted later.
+- **A one-page "[where AI is and isn't allowed](docs/ai-use.md)"** for compliance and IT: each step, who does it, and how that's enforced.
+
+155 workflow tests. The browser test now also enters the fact the AI couldn't verify and accepts the summary.
+
+**Decision** ([decision record 0004](docs/decisions/0004-summary-and-review.md)): the summary is built by template from the checked facts, not written by the model. The facts are already structured, so a model rewriting them would add the exact risk this design exists to prevent (a sentence the facts don't support) without adding information.
+
+**What broke:** nothing new. Two older tests had to learn that the history now ends with "summary drafted".
 
 ## License
 

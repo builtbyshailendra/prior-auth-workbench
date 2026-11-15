@@ -64,6 +64,11 @@ def case_detail(session: Session, case: Case, catalogue: Catalogue) -> dict:
              "resolved_at": r.resolved_at.isoformat() if r.resolved_at else None}
             for r in case.rfis
         ],
+        "checklist_fields": [
+            {"name": name, "label": FIELDS[name].label, "kind": FIELDS[name].kind}
+            for name in (catalogue.service(case.service_code).facts if catalogue.service(case.service_code) else ())
+            if name in FIELDS
+        ],
         "facts": [
             {"id": f.id, "field": f.field, "label": FIELDS[f.field].label if f.field in FIELDS else f.field,
              "value": f.value, "quote": f.quote, "document_id": f.document_id, "method": f.method,
@@ -71,6 +76,7 @@ def case_detail(session: Session, case: Case, catalogue: Catalogue) -> dict:
             for f in case.facts if not f.superseded
         ],
         "extraction": _last_run(session, case),
+        "summary": _summary(session, case),
         "history": [
             {"event": e.event, "actor": e.actor, "role": e.actor_role, "from": e.from_state, "to": e.to_state,
              "detail": e.detail, "trace_id": e.trace_id, "at": e.at.isoformat()}
@@ -87,3 +93,13 @@ def _last_run(session: Session, case: Case) -> dict | None:
         return None
     return {"provider": run.provider, "model": run.model, "status": run.status, "verified": run.verified,
             "dropped": run.dropped, "cost_usd": run.cost_usd, "duration_ms": run.duration_ms}
+
+
+def _summary(session: Session, case: Case) -> dict | None:
+    from app.summary import current
+
+    s = current(session, case)
+    if s is None:
+        return None
+    return {"text": s.text, "sentences": s.sentences, "method": s.method, "review_status": s.review_status,
+            "edited_text": s.edited_text, "reviewed_by": s.reviewed_by}

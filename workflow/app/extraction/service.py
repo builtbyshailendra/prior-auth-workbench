@@ -17,7 +17,7 @@ from datetime import timedelta
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from app import audit
+from app import audit, summary
 from app.catalogue import Catalogue
 from app.clocks import clock
 from app.extraction.fields import FIELDS
@@ -36,10 +36,14 @@ def timeout() -> timedelta:
     return timedelta(minutes=float(os.environ.get("EXTRACTION_TIMEOUT_MINUTES", "10")))
 
 
-def _ready(session: Session, case: Case, trace_id: str) -> None:
+def _ready(session: Session, case: Case, trace_id: str, catalogue: Catalogue) -> None:
     case.ready_at = clock.now()
     audit.move(session, case, "ready_for_review", "ready_for_review", actor="workflow", role="system", trace_id=trace_id,
                detail={"extraction": case.extraction_status})
+    if case.extraction_status != "not_applicable":
+        session.flush()
+        session.refresh(case)
+        summary.draft(session, case, catalogue, trace_id=trace_id)
 
 
 def complete_case(session: Session, case: Case, catalogue: Catalogue, trace_id: str) -> None:
@@ -47,7 +51,7 @@ def complete_case(session: Session, case: Case, catalogue: Catalogue, trace_id: 
     service = catalogue.service(case.service_code)
     if service is None or not service.facts:
         case.extraction_status = "not_applicable"
-        _ready(session, case, trace_id)
+        _ready(session, case, trace_id, catalogue)
     elif mode() == "worker":
         case.extraction_status = "pending"
         case.extraction_requested_at = clock.now()
@@ -55,7 +59,7 @@ def complete_case(session: Session, case: Case, catalogue: Catalogue, trace_id: 
         audit.record(session, case, "awaiting_extraction", actor="workflow", role="system", trace_id=trace_id)
     else:
         case.extraction_status = "manual_needed"
-        _ready(session, case, trace_id)
+        _ready(session, case, trace_id, catalogue)
 
 
 def claim(session: Session, limit: int) -> list[Case]:
@@ -120,12 +124,12 @@ def record_result(session: Session, case_id: int, result, catalogue: Catalogue, 
         audit.record(session, case, "extraction_failed", actor="extraction-worker", role="extractor", trace_id=trace_id,
                      detail={"provider": result.provider, "model": result.model})
     session.add(run)
-    _ready(session, case, trace_id)
+    _ready(session, case, trace_id, catalogue)
     session.commit()
     return case
 
 
-def sweep(session: Session, trace_id: str = "extraction-sweep") -> int:
+def sweep(session: Session, catalogue: Catalogue, trace_id: str = "extraction-sweep") -> int:
     """Send cases whose extraction never came back to manual entry. Returns how many."""
     cutoff = clock.now() - timeout()
     stale = session.scalars(
@@ -138,6 +142,6 @@ def sweep(session: Session, trace_id: str = "extraction-sweep") -> int:
         session.add(ExtractionRun(case_id=case.id, provider="none", model="", status="timed_out",
                                   error=f"No answer within {timeout()}"))
         audit.record(session, case, "extraction_timed_out", actor="workflow", role="system", trace_id=trace_id)
-        _ready(session, case, trace_id)
+        _ready(session, case, trace_id, catalogue)
     session.commit()
     return len(stale)

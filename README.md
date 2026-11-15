@@ -1,6 +1,6 @@
 # prior-auth-workbench
 
-![Status](https://img.shields.io/badge/status-step%201%20of%2015-orange)
+![Status](https://img.shields.io/badge/status-step%202%20of%2015-orange)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 **A prior-authorization request arrives from any of four source systems, gets checked against the health plan's documentation rules, has its key facts pulled out of the clinical notes with quotes as proof, and lands in a queue where people decide, on the clock CMS sets.**
@@ -37,7 +37,7 @@ flowchart LR
 | Stage | Steps | Status |
 |---|---|---|
 | A. Discovery | 1. Discovery pack | ✅ Done |
-| B. Core workflow | 2. Rules and validation · 3. Case lifecycle, audit, clocks · 4. Sign-in and permissions · 5. Reviewer screen | Next |
+| B. Core workflow | 2. Rules and validation · 3. Case lifecycle, audit, clocks · 4. Sign-in and permissions · 5. Reviewer screen | In progress |
 | C. Integrations | 6. Connector service and FHIR · 7. X12 278, fax and CRM · 8. Reliability | |
 | D. Bounded AI | 9. Labelled test set · 10. Extraction with checked quotes · 11. Reviewer summary | |
 | E. Operate | 12. Containers and CI · 13. Deploy, rollback and outage drills | |
@@ -88,6 +88,14 @@ The Da Vinci guides split the FHIR route into three questions:
 - **PAS:** submit and answer.
 
 The workflow here uses the same split, without claiming conformance.
+
+### Step 2: rules and validation
+
+**Built:** the service catalogue as a versioned YAML file ([`workflow/rules/catalogue.yaml`](workflow/rules/catalogue.yaml)): which services need authorization, and the documents each one needs. Format checks for everything a request carries: synthetic member IDs, provider NPI, CPT/HCPCS service codes, ICD-10-CM diagnoses and date order. A coverage check for "covered on the service date". Every problem comes back at once, with a message a coordinator can act on. 39 tests, no database needed yet.
+
+**Decision:** the rules are data, not code. The people who own them (clinical policy) change a reviewed file, and each case will record the catalogue version it was checked against. A malformed catalogue stops the service at startup instead of failing halfway through a request.
+
+**Learned:** an NPI's last digit is a Luhn check digit computed with a fixed `80840` prefix, which works out to adding 24 before the usual Luhn sum. CMS's worked example (`123456789` → check digit `3`) is now a test.
 
 ## License
 

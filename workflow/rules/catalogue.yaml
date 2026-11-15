@@ -1,0 +1,55 @@
+# Service catalogue for the fictional Tallowmere Health Plan.
+#
+# ILLUSTRATIVE ONLY. These checklists are invented for a portfolio project.
+# They are not medical policy, not payer coverage criteria, and not taken from
+# any commercial criteria product. Code numbers are used as identifiers only.
+#
+# Who changes this file: the UM clinical policy lead, signed off by the lead
+# medical director (see docs/discovery/04-stakeholders.md). Every change bumps
+# `version`, and each case records the version it was checked against.
+
+version: "2026.11-1"
+
+services:
+  "72148":
+    name: Lumbar spine MRI
+    auth_required: true
+    required_documents:
+      - type: clinician_note
+        label: Clinician note from the last 30 days
+      - type: conservative_treatment_record
+        label: Record of conservative treatment tried (physical therapy, medication or home exercise)
+    facts:
+      - conservative_therapy_weeks
+      - red_flags_present
+      - prior_imaging
+      - symptom_duration_weeks
+
+  "95810":
+    name: Sleep study in a sleep lab
+    auth_required: true
+    required_documents:
+      - type: clinician_note
+        label: Clinician note describing the sleep symptoms
+      - type: sleep_questionnaire
+        label: Completed sleep questionnaire with its score
+    facts:
+      - epworth_score
+      - home_sleep_test_done
+      - suspected_condition
+
+  "97110":
+    name: Physical therapy beyond the plan's visit limit
+    auth_required: true
+    required_documents:
+      - type: plan_of_care
+        label: Therapist's plan of care with goals
+      - type: progress_note
+        label: Most recent progress note
+    facts: []
+
+  "99213":
+    name: Established-patient office visit
+    auth_required: false
+    required_documents: []
+    facts: []

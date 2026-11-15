@@ -63,6 +63,8 @@ Open http://127.0.0.1:3000 and sign in as `ivy` (intake), `nina` or `omar` (nurs
 
 **To extract with Claude instead of the rules baseline:** `EXTRACTOR=claude ANTHROPIC_API_KEY=... docker compose up`.
 
+**To skip building:** the images CI built are public. Set `WORKFLOW_IMAGE`, `WEB_IMAGE` and `CONNECTORS_IMAGE` to `ghcr.io/builtbyshailendra/priorauth-workflow:<short commit id>` (and `priorauth-web`, `priorauth-connectors`), then run `docker compose up --no-build`.
+
 **Without Docker** (Python 3.12, Node 24+, PostgreSQL 14+):
 1. Run the workflow service: `uvicorn app.main:app` in `workflow/`, with `DATABASE_URL` set.
 2. Run the web app: `npm run dev` in `web/`.
@@ -72,12 +74,12 @@ Open http://127.0.0.1:3000 and sign in as `ivy` (intake), `nina` or `omar` (nurs
 
 | Check | What | Result |
 |---|---|---|
-| Workflow tests | 162, against real PostgreSQL: intake, duplicates (including a real race), clocks, permissions over HTTP, extraction checks, review, reports | ✅ locally |
-| Connector tests | 30: four adapters, plus failure injection against a misbehaving HTTP server | ✅ locally |
-| Browser tests | 2 Playwright journeys: intake → nurse → medical director, and a refusal the page doesn't offer | ✅ locally (Edge) |
+| Workflow tests | 162, against real PostgreSQL: intake, duplicates (including a real race), clocks, permissions over HTTP, extraction checks, review, reports | ✅ CI |
+| Connector tests | 30: four adapters, plus failure injection against a misbehaving HTTP server | ✅ CI |
+| Browser tests | 2 Playwright journeys: intake → nurse → medical director, and a refusal the page doesn't offer | ✅ CI (Chromium) and locally (Edge) |
 | Extraction test set | 40 labelled synthetic notes with traps. Rules baseline: 110 / 145 correct (75.9%), 10 false fills. **Claude: not run yet** (no API key) | [eval](workflow/eval/README.md) |
 | Simulated pilot | 200 requests through the running service: median 6 s from intake to the nurse queue; reviewers corrected 18% of the rules baseline's verified facts | [write-up](docs/delivery/pilot-simulation.md) |
-| CI: compose and Kubernetes | Every fixture through the real connectors, smoke test with the real worker, an AI-outage drill, a bad release rolled back under load, a database-outage drill | Runs on every push once the repo is on GitHub |
+| CI: compose and Kubernetes | Every fixture through the real connectors, smoke test with the real worker, AI-outage drills, a bad release rolled back under load (327 calls, none failed), a database outage with no restarts | ✅ [on every push](https://github.com/builtbyshailendra/prior-auth-workbench/actions/workflows/ci.yml) |
 | Peer review | One real person, timed with and without the facts | **Not done yet** ([protocol](docs/delivery/peer-review.md)) |
 
 ## What it doesn't do
@@ -412,6 +414,24 @@ AS-08 (a made-up quote is dropped) and AS-09 (AI failure or silence goes to manu
 - run the Claude evaluation (needs an API key)
 - the peer review with a real person
 - record the demo in my own voice
+
+### First run on GitHub
+
+**Result:** every CI job passed on the first run ([run 43745809625](https://github.com/builtbyshailendra/prior-auth-workbench/actions/runs/43745809625)). That included the compose and Kubernetes jobs, which had never run before, because Docker can't run on my machine.
+
+**Evidence from that run:**
+
+| Check | Result |
+|---|---|
+| Fixtures through the real connectors | 9 delivered, 1 refused (`REQ5003`: provider NPI check digit is invalid), never sent |
+| Smoke test with the real extraction worker | Case reached the nurse queue with verified facts: therapy weeks, red flags, symptom duration. Approved, 7 audit events |
+| AI outage, compose | Worker stopped: the new case still reached the nurse queue, marked for manual entry, about 53 seconds later (30-second timeout) |
+| Bad release on Kubernetes 1.37.0 | Refused and rolled back. **327 calls over 67 seconds, none failed.** Workflow, worker and web all back on `838f154` |
+| Rollout history | Revision 2 "release bad", revision 3 "release 838f154" |
+| AI outage, Kubernetes | Worker scaled to zero: the case still reached a nurse, marked for manual entry |
+| Database outage | Workflow restart counts `0 0` before and during the outage. Not-ready, not restarted; recovered by itself |
+
+**Worth knowing:** the images CI pushed to GitHub Container Registry (`priorauth-workflow`, `priorauth-web`, `priorauth-connectors`) can be pulled without signing in. I checked anonymously. They hold only code and synthetic fixtures. Each package's settings can make it private.
 
 ## License
 
